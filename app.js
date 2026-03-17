@@ -514,6 +514,7 @@ function switchTab(tab) {
   document.getElementById('heroMarket').style.display = isSoil ? 'none'  : 'block';
   document.getElementById('tabSoil').classList.toggle('active', isSoil);
   document.getElementById('tabMarket').classList.toggle('active', !isSoil);
+  setMobileTab(tab);
 
   if (!isSoil) {
     if (currentUser) {
@@ -524,6 +525,15 @@ function switchTab(tab) {
       document.getElementById('buyerDashboard').style.display  = 'none';
     }
   }
+}
+
+function setMobileTab(tab) {
+  const isSoil = tab === 'soil';
+  const soilBtn   = document.getElementById('mobileTabSoil');
+  const marketBtn = document.getElementById('mobileTabMarket');
+  if (soilBtn)   soilBtn.classList.toggle('active', isSoil);
+  if (marketBtn) marketBtn.classList.toggle('active', !isSoil);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 // ══════════════════════════════════════════════════════════════

@@ -452,9 +452,9 @@ function setLang(lang) {
   currentLang = lang;
   localStorage.setItem('agri_lang', lang);
 
-  // Update active button
-  document.querySelectorAll('.lang-btn').forEach(btn => {
-    btn.classList.toggle('active', btn.textContent.trim() === getLangLabel(lang));
+  // Update active button using data-lang attribute
+  document.querySelectorAll('.lang-btn, .mobile-lang-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.getAttribute('data-lang') === lang);
   });
 
   applyTranslations();
@@ -471,39 +471,25 @@ function t(key) {
 
 // ── APPLY ALL TRANSLATIONS TO PAGE ───────────────────────────
 function applyTranslations() {
-  // Text content
   document.querySelectorAll('[data-i18n]').forEach(el => {
-    const key = el.getAttribute('data-i18n');
-    el.textContent = t(key);
+    el.textContent = t(el.getAttribute('data-i18n'));
   });
-
-  // Inner HTML (for titles with <br> and <em>)
   document.querySelectorAll('[data-i18n-html]').forEach(el => {
-    const key = el.getAttribute('data-i18n-html');
-    el.innerHTML = t(key);
+    el.innerHTML = t(el.getAttribute('data-i18n-html'));
   });
-
-  // Placeholders
   document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
-    const key = el.getAttribute('data-i18n-placeholder');
-    el.placeholder = t(key);
+    el.placeholder = t(el.getAttribute('data-i18n-placeholder'));
   });
-
-  // Select options
   document.querySelectorAll('option[data-i18n]').forEach(el => {
-    const key = el.getAttribute('data-i18n');
-    el.textContent = t(key);
+    el.textContent = t(el.getAttribute('data-i18n'));
   });
-
-  // Update html lang attribute
   document.documentElement.lang = currentLang;
 }
 
 // Apply on page load
 document.addEventListener('DOMContentLoaded', () => {
-  // Set correct active button on load
-  document.querySelectorAll('.lang-btn').forEach(btn => {
-    btn.classList.toggle('active', btn.textContent.trim() === getLangLabel(currentLang));
+  document.querySelectorAll('.lang-btn, .mobile-lang-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.getAttribute('data-lang') === currentLang);
   });
   applyTranslations();
 });

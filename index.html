@@ -23,9 +23,9 @@
     <div class="nav-right">
       <!-- Language Selector -->
       <div class="lang-selector">
-        <button class="lang-btn active" onclick="setLang('en')">EN</button>
-        <button class="lang-btn" onclick="setLang('kn')">ಕನ್ನಡ</button>
-        <button class="lang-btn" onclick="setLang('hi')">हिंदी</button>
+        <button class="lang-btn active" data-lang="en" onclick="setLang('en')">EN</button>
+        <button class="lang-btn" data-lang="kn" onclick="setLang('kn')">ಕನ್ನಡ</button>
+        <button class="lang-btn" data-lang="hi" onclick="setLang('hi')">हिंदी</button>
       </div>
       <div class="nav-user" id="navUser" style="display:none;">
         <span>&#128100;</span>
@@ -421,6 +421,24 @@
   <footer class="footer">
     &#127807; AgriPrice Portal &mdash; <span data-i18n="footer.text">Smart Farming &amp; Crop Marketplace</span>
   </footer>
+
+  <!-- MOBILE BOTTOM NAV -->
+  <div class="mobile-bottom-nav">
+    <button class="mobile-nav-btn active" id="mobileTabSoil" onclick="switchTab('soil'); setMobileTab('soil')">
+      <span class="mobile-nav-icon">&#127807;</span>
+      <span class="mobile-nav-label" data-i18n="nav.soil">Soil Analysis</span>
+    </button>
+    <button class="mobile-nav-btn" id="mobileTabMarket" onclick="switchTab('market'); setMobileTab('market')">
+      <span class="mobile-nav-icon">&#128722;</span>
+      <span class="mobile-nav-label" data-i18n="nav.market">Marketplace</span>
+    </button>
+    <!-- Language switcher in bottom bar -->
+    <div class="mobile-lang-row">
+      <button class="mobile-lang-btn active" data-lang="en" onclick="setLang('en')">EN</button>
+      <button class="mobile-lang-btn" data-lang="kn" onclick="setLang('kn')">ಕ</button>
+      <button class="mobile-lang-btn" data-lang="hi" onclick="setLang('hi')">हि</button>
+    </div>
+  </div>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="i18n.js"></script>
