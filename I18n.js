@@ -1,28 +1,24 @@
 /* ============================================================
    AgriPrice Portal - i18n.js
-   Languages: English, Kannada (ಕನ್ನಡ), Hindi (हिंदी)
+   Languages: English, Kannada, Hindi
    ============================================================ */
 
 const TRANSLATIONS = {
 
-  // ── ENGLISH ────────────────────────────────────────────────
   en: {
     'nav.soil':           'Soil Analysis',
     'nav.market':         'Marketplace',
     'nav.logout':         'Logout',
-
     'hero.soil.tag':      'For Every Farmer',
     'hero.soil.title':    'Know Your Soil.<br><em>Grow Better.</em>',
     'hero.soil.sub':      'Enter your soil values. Our smart AI predicts fertility, recommends crops with live market prices, and suggests fertilizers.',
     'hero.market.tag':    'Direct to Buyer',
     'hero.market.title':  'Sell Your Crops.<br><em>Better Prices.</em>',
     'hero.market.sub':    'Register, list your produce, get orders directly from buyers — no middlemen, more profit for you.',
-
     'weather.title':      'Auto-detect Weather & Location',
-    'weather.sub':        'Fills temperature & humidity automatically. Improves crop recommendations.',
-    'weather.btn':        '🌍 Detect My Location',
+    'weather.sub':        'Fills temperature & humidity automatically.',
+    'weather.btn':        'Detect My Location',
     'weather.placeholder':'Or type your location (e.g. Mysuru, Karnataka)',
-
     'soil.form.title':    'Enter Your Soil Test Values',
     'soil.nitrogen':      'NITROGEN – N (kg/ha)',
     'soil.phosphorus':    'PHOSPHORUS – P (kg/ha)',
@@ -52,7 +48,6 @@ const TRANSLATIONS = {
     'soil.ph.hint':       'Ideal: 5.5–7.0',
     'soil.crop.label':    'WHAT DO YOU PLAN TO GROW? (optional)',
     'soil.analyze':       'Analyze My Soil',
-
     'crop.rice':          'Rice',
     'crop.wheat':         'Wheat',
     'crop.maize':         'Maize',
@@ -61,7 +56,6 @@ const TRANSLATIONS = {
     'crop.soybean':       'Soybean',
     'crop.vegetables':    'Vegetables',
     'crop.fruits':        'Fruits',
-
     'loader.title':       'Analyzing your soil...',
     'loader.sub':         'Processing your values using smart AI',
     'loader.s1':          'Reading soil values',
@@ -69,7 +63,6 @@ const TRANSLATIONS = {
     'loader.s3':          'Calculating fertility score',
     'loader.s4':          'Matching best crops',
     'loader.s5':          'Fetching live mandi prices',
-
     'result.nutrients':   'Nutrient Levels',
     'result.crops':       'Best Crops for Your Soil',
     'result.mandi':       'Live Mandi Prices',
@@ -79,7 +72,6 @@ const TRANSLATIONS = {
     'result.ai':          'Detailed Recommendation',
     'result.print':       'Print Results',
     'result.reset':       'Analyze Another Sample',
-
     'auth.login':         'Login',
     'auth.register':      'Register',
     'auth.welcome':       'Welcome Back',
@@ -97,14 +89,13 @@ const TRANSLATIONS = {
     'auth.name':          'Full Name',
     'auth.name.placeholder': 'e.g. Ramesh Gowda',
     'auth.location':      'Location',
-    'auth.loc.placeholder':'e.g. Kolar, Karnataka',
+    'auth.loc.placeholder': 'e.g. Kolar, Karnataka',
     'auth.iam':           'I am a',
     'auth.farmer.opt':    'Farmer — I want to sell crops',
     'auth.buyer.opt':     'Buyer — I want to buy crops',
     'auth.create.btn':    'Create Account',
     'auth.have.account':  'Already have an account?',
     'auth.login.here':    'Login here',
-
     'farmer.title':       'Farmer Dashboard',
     'farmer.listings':    'Active Listings',
     'farmer.orders':      'Total Orders',
@@ -124,7 +115,6 @@ const TRANSLATIONS = {
     'farmer.incoming':    'Incoming Orders',
     'farmer.no.listings': 'No listings yet. Add your first crop above!',
     'farmer.no.orders':   'No orders yet.',
-
     'buyer.title':        'Browse Produce',
     'buyer.search':       'Search crop or location...',
     'buyer.newest':       'Newest First',
@@ -135,40 +125,32 @@ const TRANSLATIONS = {
     'buyer.call':         'Call Farmer',
     'buyer.order':        'Place Order',
     'buyer.map.placeholder': 'Add listings with locations to see them on the map',
-
     'order.title':        'Place Order',
     'order.qty':          'Quantity you want (kg)',
     'order.msg':          'Message to farmer (optional)',
     'order.msg.ph':       'e.g. Need delivery by Friday...',
     'order.confirm':      'Confirm Order',
     'order.cancel':       'Cancel',
-
     'notif.title':        'Notifications',
     'notif.updates':      'Order Updates',
     'notif.clear':        'Clear all',
-    'notif.none':         'No notifications yet.',
-
     'footer.text':        'Smart Farming & Crop Marketplace',
   },
 
-  // ── KANNADA ───────────────────────────────────────────────
   kn: {
     'nav.soil':           'ಮಣ್ಣು ವಿಶ್ಲೇಷಣೆ',
     'nav.market':         'ಮಾರುಕಟ್ಟೆ',
     'nav.logout':         'ಲಾಗ್ ಔಟ್',
-
     'hero.soil.tag':      'ಪ್ರತಿ ರೈತರಿಗೂ',
     'hero.soil.title':    'ನಿಮ್ಮ ಮಣ್ಣನ್ನು ತಿಳಿಯಿರಿ.<br><em>ಉತ್ತಮವಾಗಿ ಬೆಳೆಯಿರಿ.</em>',
-    'hero.soil.sub':      'ನಿಮ್ಮ ಮಣ್ಣಿನ ಮೌಲ್ಯಗಳನ್ನು ನಮೂದಿಸಿ. ನಮ್ಮ AI ತಕ್ಷಣವೇ ಫಲವತ್ತತೆ ಊಹಿಸುತ್ತದೆ, ಬೆಳೆ ಶಿಫಾರಸು ಮತ್ತು ಗೊಬ್ಬರ ಸಲಹೆ ನೀಡುತ್ತದೆ.',
+    'hero.soil.sub':      'ನಿಮ್ಮ ಮಣ್ಣಿನ ಮೌಲ್ಯಗಳನ್ನು ನಮೂದಿಸಿ. ನಮ್ಮ AI ತಕ್ಷಣ ಫಲವತ್ತತೆ ಊಹಿಸುತ್ತದೆ.',
     'hero.market.tag':    'ನೇರ ಖರೀದಿದಾರರಿಗೆ',
     'hero.market.title':  'ನಿಮ್ಮ ಬೆಳೆ ಮಾರಿ.<br><em>ಉತ್ತಮ ಬೆಲೆ ಪಡೆಯಿರಿ.</em>',
-    'hero.market.sub':    'ನೋಂದಾಯಿಸಿ, ನಿಮ್ಮ ಉತ್ಪನ್ನ ಪಟ್ಟಿ ಮಾಡಿ, ನೇರ ಖರೀದಿದಾರರಿಂದ ಆರ್ಡರ್ ಪಡೆಯಿರಿ — ಮಧ್ಯವರ್ತಿ ಇಲ್ಲ.',
-
+    'hero.market.sub':    'ನೋಂದಾಯಿಸಿ, ಉತ್ಪನ್ನ ಪಟ್ಟಿ ಮಾಡಿ, ನೇರ ಆರ್ಡರ್ ಪಡೆಯಿರಿ — ಮಧ್ಯವರ್ತಿ ಇಲ್ಲ.',
     'weather.title':      'ಹವಾಮಾನ ಮತ್ತು ಸ್ಥಳ ಪತ್ತೆ',
-    'weather.sub':        'ತಾಪಮಾನ ಮತ್ತು ತೇವಾಂಶ ಸ್ವಯಂಚಾಲಿತವಾಗಿ ತುಂಬಿಸುತ್ತದೆ.',
-    'weather.btn':        '🌍 ನನ್ನ ಸ್ಥಳ ಪತ್ತೆ ಮಾಡಿ',
-    'weather.placeholder':'ನಿಮ್ಮ ಸ್ಥಳ ಟೈಪ್ ಮಾಡಿ (ಉದಾ: ಮೈಸೂರು, ಕರ್ನಾಟಕ)',
-
+    'weather.sub':        'ತಾಪಮಾನ ಸ್ವಯಂಚಾಲಿತವಾಗಿ ತುಂಬಿಸುತ್ತದೆ.',
+    'weather.btn':        'ನನ್ನ ಸ್ಥಳ ಪತ್ತೆ ಮಾಡಿ',
+    'weather.placeholder': 'ನಿಮ್ಮ ಸ್ಥಳ ಟೈಪ್ ಮಾಡಿ (ಉದಾ: ಮೈಸೂರು)',
     'soil.form.title':    'ನಿಮ್ಮ ಮಣ್ಣು ಪರೀಕ್ಷೆ ಮೌಲ್ಯಗಳನ್ನು ನಮೂದಿಸಿ',
     'soil.nitrogen':      'ಸಾರಜನಕ – N (kg/ha)',
     'soil.phosphorus':    'ರಂಜಕ – P (kg/ha)',
@@ -196,9 +178,8 @@ const TRANSLATIONS = {
     'soil.m.hint':        'ಸಾಮಾನ್ಯ: 20–60%',
     'soil.t.hint':        'ಸಾಮಾನ್ಯ: 15–35°C',
     'soil.ph.hint':       'ಉತ್ತಮ: 5.5–7.0',
-    'soil.crop.label':    'ನೀವು ಯಾವ ಬೆಳೆ ಬೆಳೆಯಲು ಬಯಸುತ್ತೀರಿ? (ಐಚ್ಛಿಕ)',
+    'soil.crop.label':    'ನೀವು ಏನು ಬೆಳೆಯಲು ಬಯಸುತ್ತೀರಿ? (ಐಚ್ಛಿಕ)',
     'soil.analyze':       'ನನ್ನ ಮಣ್ಣು ವಿಶ್ಲೇಷಿಸಿ',
-
     'crop.rice':          'ಭತ್ತ',
     'crop.wheat':         'ಗೋಧಿ',
     'crop.maize':         'ಮೆಕ್ಕೆ ಜೋಳ',
@@ -207,15 +188,13 @@ const TRANSLATIONS = {
     'crop.soybean':       'ಸೋಯಾಬೀನ್',
     'crop.vegetables':    'ತರಕಾರಿ',
     'crop.fruits':        'ಹಣ್ಣುಗಳು',
-
     'loader.title':       'ನಿಮ್ಮ ಮಣ್ಣನ್ನು ವಿಶ್ಲೇಷಿಸಲಾಗುತ್ತಿದೆ...',
-    'loader.sub':         'ಸ್ಮಾರ್ಟ್ AI ಮೂಲಕ ಪ್ರಕ್ರಿಯೆ ನಡೆಯುತ್ತಿದೆ',
+    'loader.sub':         'ಸ್ಮಾರ್ಟ್ AI ಮೂಲಕ ಪ್ರಕ್ರಿಯೆ',
     'loader.s1':          'ಮಣ್ಣಿನ ಮೌಲ್ಯಗಳನ್ನು ಓದಲಾಗುತ್ತಿದೆ',
     'loader.s2':          'ಹವಾಮಾನ ದತ್ತಾಂಶ ಪರಿಶೀಲಿಸಲಾಗುತ್ತಿದೆ',
     'loader.s3':          'ಫಲವತ್ತತೆ ಅಂಕ ಲೆಕ್ಕಾಚಾರ',
     'loader.s4':          'ಉತ್ತಮ ಬೆಳೆ ಹೊಂದಿಸಲಾಗುತ್ತಿದೆ',
     'loader.s5':          'ಮಂಡಿ ಬೆಲೆ ತರಲಾಗುತ್ತಿದೆ',
-
     'result.nutrients':   'ಪೋಷಕಾಂಶ ಮಟ್ಟಗಳು',
     'result.crops':       'ನಿಮ್ಮ ಮಣ್ಣಿಗೆ ಉತ್ತಮ ಬೆಳೆಗಳು',
     'result.mandi':       'ಲೈವ್ ಮಂಡಿ ಬೆಲೆಗಳು',
@@ -225,7 +204,6 @@ const TRANSLATIONS = {
     'result.ai':          'ವಿವರವಾದ ಶಿಫಾರಸು',
     'result.print':       'ಮುದ್ರಿಸಿ',
     'result.reset':       'ಮತ್ತೊಂದು ಮಾದರಿ ವಿಶ್ಲೇಷಿಸಿ',
-
     'auth.login':         'ಲಾಗಿನ್',
     'auth.register':      'ನೋಂದಣಿ',
     'auth.welcome':       'ಮತ್ತೆ ಸ್ವಾಗತ',
@@ -243,14 +221,13 @@ const TRANSLATIONS = {
     'auth.name':          'ಪೂರ್ಣ ಹೆಸರು',
     'auth.name.placeholder': 'ಉದಾ: ರಮೇಶ್ ಗೌಡ',
     'auth.location':      'ಸ್ಥಳ',
-    'auth.loc.placeholder':'ಉದಾ: ಕೋಲಾರ, ಕರ್ನಾಟಕ',
+    'auth.loc.placeholder': 'ಉದಾ: ಕೋಲಾರ, ಕರ್ನಾಟಕ',
     'auth.iam':           'ನಾನು',
     'auth.farmer.opt':    'ರೈತ — ಬೆಳೆ ಮಾರಲು ಬಯಸುತ್ತೇನೆ',
     'auth.buyer.opt':     'ಖರೀದಿದಾರ — ಬೆಳೆ ಕೊಳ್ಳಲು ಬಯಸುತ್ತೇನೆ',
     'auth.create.btn':    'ಖಾತೆ ರಚಿಸಿ',
     'auth.have.account':  'ಈಗಾಗಲೇ ಖಾತೆ ಇದೆಯೇ?',
     'auth.login.here':    'ಇಲ್ಲಿ ಲಾಗಿನ್ ಮಾಡಿ',
-
     'farmer.title':       'ರೈತ ಡ್ಯಾಶ್‌ಬೋರ್ಡ್',
     'farmer.listings':    'ಸಕ್ರಿಯ ಪಟ್ಟಿಗಳು',
     'farmer.orders':      'ಒಟ್ಟು ಆರ್ಡರ್‌ಗಳು',
@@ -270,7 +247,6 @@ const TRANSLATIONS = {
     'farmer.incoming':    'ಬಂದ ಆರ್ಡರ್‌ಗಳು',
     'farmer.no.listings': 'ಇನ್ನೂ ಪಟ್ಟಿ ಇಲ್ಲ.',
     'farmer.no.orders':   'ಇನ್ನೂ ಆರ್ಡರ್ ಇಲ್ಲ.',
-
     'buyer.title':        'ಉತ್ಪನ್ನ ಬ್ರೌಸ್ ಮಾಡಿ',
     'buyer.search':       'ಬೆಳೆ ಅಥವಾ ಸ್ಥಳ ಹುಡುಕಿ...',
     'buyer.newest':       'ಹೊಸದು ಮೊದಲು',
@@ -281,40 +257,32 @@ const TRANSLATIONS = {
     'buyer.call':         'ರೈತರಿಗೆ ಕರೆ ಮಾಡಿ',
     'buyer.order':        'ಆರ್ಡರ್ ಮಾಡಿ',
     'buyer.map.placeholder': 'ನಕ್ಷೆಯಲ್ಲಿ ಸ್ಥಳ ನೋಡಲು ಪಟ್ಟಿಗಳನ್ನು ಸೇರಿಸಿ',
-
     'order.title':        'ಆರ್ಡರ್ ಮಾಡಿ',
     'order.qty':          'ನಿಮಗೆ ಬೇಕಾದ ಪ್ರಮಾಣ (kg)',
     'order.msg':          'ರೈತರಿಗೆ ಸಂದೇಶ (ಐಚ್ಛಿಕ)',
     'order.msg.ph':       'ಉದಾ: ಶುಕ್ರವಾರದೊಳಗೆ ಬೇಕು...',
     'order.confirm':      'ಆರ್ಡರ್ ಖಚಿತಪಡಿಸಿ',
     'order.cancel':       'ರದ್ದು ಮಾಡಿ',
-
     'notif.title':        'ಅಧಿಸೂಚನೆಗಳು',
     'notif.updates':      'ಆರ್ಡರ್ ನವೀಕರಣಗಳು',
     'notif.clear':        'ಎಲ್ಲ ತೆರವು',
-    'notif.none':         'ಇನ್ನೂ ಅಧಿಸೂಚನೆ ಇಲ್ಲ.',
-
     'footer.text':        'ಸ್ಮಾರ್ಟ್ ಕೃಷಿ ಮತ್ತು ಬೆಳೆ ಮಾರುಕಟ್ಟೆ',
   },
 
-  // ── HINDI ─────────────────────────────────────────────────
   hi: {
     'nav.soil':           'मिट्टी विश्लेषण',
     'nav.market':         'बाज़ार',
     'nav.logout':         'लॉग आउट',
-
     'hero.soil.tag':      'हर किसान के लिए',
     'hero.soil.title':    'अपनी मिट्टी को जानें.<br><em>बेहतर उगाएं.</em>',
-    'hero.soil.sub':      'अपनी मिट्टी के मान दर्ज करें. हमारा AI तुरंत उर्वरता का अनुमान लगाता है, फसल की सिफारिश और खाद सुझाव देता है.',
+    'hero.soil.sub':      'अपनी मिट्टी के मान दर्ज करें. हमारा AI तुरंत उर्वरता का अनुमान लगाता है.',
     'hero.market.tag':    'सीधे खरीदार को',
     'hero.market.title':  'अपनी फसल बेचें.<br><em>बेहतर दाम पाएं.</em>',
-    'hero.market.sub':    'पंजीकरण करें, अपनी उपज सूचीबद्ध करें, सीधे खरीदारों से ऑर्डर पाएं — कोई बिचौलिया नहीं.',
-
+    'hero.market.sub':    'पंजीकरण करें, उपज सूचीबद्ध करें, सीधे ऑर्डर पाएं — कोई बिचौलिया नहीं.',
     'weather.title':      'मौसम और स्थान स्वतः पहचान',
-    'weather.sub':        'तापमान और नमी स्वचालित रूप से भरता है. फसल सिफारिशें बेहतर होती हैं.',
-    'weather.btn':        '🌍 मेरा स्थान पहचानें',
-    'weather.placeholder':'अपना स्थान टाइप करें (जैसे: मैसूर, कर्नाटक)',
-
+    'weather.sub':        'तापमान स्वचालित रूप से भरता है.',
+    'weather.btn':        'मेरा स्थान पहचानें',
+    'weather.placeholder': 'अपना स्थान टाइप करें (जैसे: मैसूर)',
     'soil.form.title':    'अपने मिट्टी परीक्षण के मान दर्ज करें',
     'soil.nitrogen':      'नाइट्रोजन – N (kg/ha)',
     'soil.phosphorus':    'फास्फोरस – P (kg/ha)',
@@ -344,7 +312,6 @@ const TRANSLATIONS = {
     'soil.ph.hint':       'आदर्श: 5.5–7.0',
     'soil.crop.label':    'आप क्या उगाना चाहते हैं? (वैकल्पिक)',
     'soil.analyze':       'मेरी मिट्टी का विश्लेषण करें',
-
     'crop.rice':          'चावल',
     'crop.wheat':         'गेहूं',
     'crop.maize':         'मक्का',
@@ -353,7 +320,6 @@ const TRANSLATIONS = {
     'crop.soybean':       'सोयाबीन',
     'crop.vegetables':    'सब्जियां',
     'crop.fruits':        'फल',
-
     'loader.title':       'आपकी मिट्टी का विश्लेषण हो रहा है...',
     'loader.sub':         'स्मार्ट AI से प्रक्रिया चल रही है',
     'loader.s1':          'मिट्टी के मान पढ़े जा रहे हैं',
@@ -361,7 +327,6 @@ const TRANSLATIONS = {
     'loader.s3':          'उर्वरता स्कोर गणना',
     'loader.s4':          'सर्वश्रेष्ठ फसलें मिलाई जा रही हैं',
     'loader.s5':          'मंडी भाव लाए जा रहे हैं',
-
     'result.nutrients':   'पोषक तत्वों का स्तर',
     'result.crops':       'आपकी मिट्टी के लिए सर्वश्रेष्ठ फसलें',
     'result.mandi':       'लाइव मंडी भाव',
@@ -371,7 +336,6 @@ const TRANSLATIONS = {
     'result.ai':          'विस्तृत सिफारिश',
     'result.print':       'प्रिंट करें',
     'result.reset':       'दूसरा नमूना विश्लेषण करें',
-
     'auth.login':         'लॉगिन',
     'auth.register':      'पंजीकरण',
     'auth.welcome':       'वापस स्वागत है',
@@ -389,14 +353,13 @@ const TRANSLATIONS = {
     'auth.name':          'पूरा नाम',
     'auth.name.placeholder': 'जैसे: रमेश गौड़ा',
     'auth.location':      'स्थान',
-    'auth.loc.placeholder':'जैसे: कोलार, कर्नाटक',
+    'auth.loc.placeholder': 'जैसे: कोलार, कर्नाटक',
     'auth.iam':           'मैं हूं',
     'auth.farmer.opt':    'किसान — फसल बेचना चाहता हूं',
     'auth.buyer.opt':     'खरीदार — फसल खरीदना चाहता हूं',
     'auth.create.btn':    'खाता बनाएं',
     'auth.have.account':  'पहले से खाता है?',
     'auth.login.here':    'यहाँ लॉगिन करें',
-
     'farmer.title':       'किसान डैशबोर्ड',
     'farmer.listings':    'सक्रिय सूचियां',
     'farmer.orders':      'कुल ऑर्डर',
@@ -416,7 +379,6 @@ const TRANSLATIONS = {
     'farmer.incoming':    'आने वाले ऑर्डर',
     'farmer.no.listings': 'अभी कोई सूची नहीं.',
     'farmer.no.orders':   'अभी कोई ऑर्डर नहीं.',
-
     'buyer.title':        'उपज ब्राउज़ करें',
     'buyer.search':       'फसल या स्थान खोजें...',
     'buyer.newest':       'नया पहले',
@@ -427,69 +389,69 @@ const TRANSLATIONS = {
     'buyer.call':         'किसान को कॉल करें',
     'buyer.order':        'ऑर्डर करें',
     'buyer.map.placeholder': 'मानचित्र पर स्थान देखने के लिए सूचियां जोड़ें',
-
     'order.title':        'ऑर्डर करें',
     'order.qty':          'आपको चाहिए मात्रा (kg)',
     'order.msg':          'किसान को संदेश (वैकल्पिक)',
     'order.msg.ph':       'जैसे: शुक्रवार तक चाहिए...',
     'order.confirm':      'ऑर्डर पक्का करें',
     'order.cancel':       'रद्द करें',
-
     'notif.title':        'सूचनाएं',
     'notif.updates':      'ऑर्डर अपडेट',
     'notif.clear':        'सब साफ़ करें',
-    'notif.none':         'अभी कोई सूचना नहीं.',
-
     'footer.text':        'स्मार्ट खेती और फसल बाज़ार',
   },
 };
 
-// ── CURRENT LANGUAGE ──────────────────────────────────────────
+// ── LANGUAGE STATE ────────────────────────────────────────────
 let currentLang = localStorage.getItem('agri_lang') || 'en';
 
-// ── SET LANGUAGE ──────────────────────────────────────────────
+// ── SET LANGUAGE (called by buttons) ──────────────────────────
 function setLang(lang) {
   currentLang = lang;
   localStorage.setItem('agri_lang', lang);
-
-  // Update active button using data-lang attribute
-  document.querySelectorAll('.lang-btn, .mobile-lang-btn').forEach(btn => {
-    btn.classList.toggle('active', btn.getAttribute('data-lang') === lang);
-  });
-
+  updateLangButtons();
   applyTranslations();
 }
 
-function getLangLabel(lang) {
-  return { en: 'EN', kn: 'ಕನ್ನಡ', hi: 'हिंदी' }[lang] || 'EN';
+// ── UPDATE WHICH BUTTON IS ACTIVE ─────────────────────────────
+function updateLangButtons() {
+  document.querySelectorAll('[data-lang]').forEach(btn => {
+    btn.classList.toggle('active', btn.getAttribute('data-lang') === currentLang);
+  });
 }
 
-// ── TRANSLATE A KEY ───────────────────────────────────────────
+// ── GET TRANSLATION ───────────────────────────────────────────
 function t(key) {
   return TRANSLATIONS[currentLang]?.[key] || TRANSLATIONS['en']?.[key] || key;
 }
 
-// ── APPLY ALL TRANSLATIONS TO PAGE ───────────────────────────
+// ── APPLY ALL TRANSLATIONS ────────────────────────────────────
 function applyTranslations() {
+  // Regular text — skip lang buttons (they have data-lang not data-i18n)
   document.querySelectorAll('[data-i18n]').forEach(el => {
     el.textContent = t(el.getAttribute('data-i18n'));
   });
+
+  // HTML content (titles with <br><em>)
   document.querySelectorAll('[data-i18n-html]').forEach(el => {
     el.innerHTML = t(el.getAttribute('data-i18n-html'));
   });
+
+  // Placeholders
   document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
     el.placeholder = t(el.getAttribute('data-i18n-placeholder'));
   });
+
+  // Select options
   document.querySelectorAll('option[data-i18n]').forEach(el => {
     el.textContent = t(el.getAttribute('data-i18n'));
   });
+
   document.documentElement.lang = currentLang;
 }
 
-// Apply on page load
+// ── RUN ON PAGE LOAD ──────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
-  document.querySelectorAll('.lang-btn, .mobile-lang-btn').forEach(btn => {
-    btn.classList.toggle('active', btn.getAttribute('data-lang') === currentLang);
-  });
+  updateLangButtons();
   applyTranslations();
 });
