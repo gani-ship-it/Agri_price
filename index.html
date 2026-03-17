@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AgriPrice Portal</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,700;0,9..144,900;1,9..144,400&family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <div class="nav-logo">
+      <span class="nav-dot"></span>
+      AgriPrice Portal
+    </div>
+    <div class="nav-tabs">
+      <button class="nav-tab active" id="tabSoil" onclick="switchTab('soil')" data-i18n="nav.soil">&#127807; Soil Analysis</button>
+      <button class="nav-tab" id="tabMarket" onclick="switchTab('market')" data-i18n="nav.market">&#128722; Marketplace</button>
+    </div>
+    <div class="nav-right">
+      <!-- Language Selector -->
+      <div class="lang-selector">
+        <button class="lang-btn active" onclick="setLang('en')">EN</button>
+        <button class="lang-btn" onclick="setLang('kn')">ಕನ್ನಡ</button>
+        <button class="lang-btn" onclick="setLang('hi')">हिंदी</button>
+      </div>
+      <div class="nav-user" id="navUser" style="display:none;">
+        <span>&#128100;</span>
+        <span id="navUserName"></span>
+        <button class="btn-logout" onclick="logout()" data-i18n="nav.logout">Logout</button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- SOIL HERO -->
+  <section class="hero" id="heroSoil">
+    <div class="hero-tag" data-i18n="hero.soil.tag">&#127806; For Every Farmer</div>
+    <h1 class="hero-title" data-i18n-html="hero.soil.title">Know Your Soil.<br /><em>Grow Better.</em></h1>
+    <p class="hero-sub" data-i18n="hero.soil.sub">Enter your soil values. Our smart AI predicts fertility, recommends crops with live market prices, and suggests fertilizers.</p>
+  </section>
+
+  <!-- MARKETPLACE HERO -->
+  <section class="hero" id="heroMarket" style="display:none;">
+    <div class="hero-tag" data-i18n="hero.market.tag">&#128722; Direct to Buyer</div>
+    <h1 class="hero-title" data-i18n-html="hero.market.title">Sell Your Crops.<br /><em>Better Prices.</em></h1>
+    <p class="hero-sub" data-i18n="hero.market.sub">Register, list your produce, get orders directly from buyers &mdash; no middlemen, more profit for you.</p>
+  </section>
+
+  <main class="container">
+
+  <!-- SOIL TAB -->
+  <div id="soilTab">
+
+    <!-- Weather card -->
+    <div class="weather-card">
+      <div class="weather-card-left">
+        <div class="weather-icon">&#127780;</div>
+        <div>
+          <div class="weather-card-title" data-i18n="weather.title">Auto-detect Weather &amp; Location</div>
+          <div class="weather-card-sub" data-i18n="weather.sub">Fills temperature &amp; humidity automatically.</div>
+        </div>
+      </div>
+      <button class="btn-detect" id="detectLocationBtn" onclick="detectLocation()" data-i18n="weather.btn">&#127759; Detect My Location</button>
+    </div>
+    <div id="weatherStatus" class="weather-status"></div>
+    <div class="location-row">
+      <input type="text" id="locationInput" data-i18n-placeholder="weather.placeholder" placeholder="Or type your location (e.g. Mysuru, Karnataka)" onblur="fetchWeatherByCity(this.value)" />
+    </div>
+
+    <!-- Soil input card -->
+    <div class="manual-card" id="manualCard">
+      <div class="manual-header-static">
+        <div class="manual-icon">&#129514;</div>
+        <span data-i18n="soil.form.title">Enter Your Soil Test Values</span>
+      </div>
+      <div class="manual-body open">
+        <div class="fields-grid">
+          <div class="field-group">
+            <label data-i18n="soil.nitrogen">&#127807; NITROGEN &ndash; N (kg/ha)</label>
+            <input type="number" id="nitrogen" placeholder="e.g. 140" min="0" max="600" inputmode="numeric" />
+            <span class="field-hint" data-i18n="soil.n.hint">Typical: 80&ndash;200</span>
+          </div>
+          <div class="field-group">
+            <label data-i18n="soil.phosphorus">&#127800; PHOSPHORUS &ndash; P (kg/ha)</label>
+            <input type="number" id="phosphorus" placeholder="e.g. 45" min="0" max="200" inputmode="numeric" />
+            <span class="field-hint" data-i18n="soil.p.hint">Typical: 20&ndash;80</span>
+          </div>
+          <div class="field-group">
+            <label data-i18n="soil.potassium">&#127810; POTASSIUM &ndash; K (kg/ha)</label>
+            <input type="number" id="potassium" placeholder="e.g. 200" min="0" max="600" inputmode="numeric" />
+            <span class="field-hint" data-i18n="soil.k.hint">Typical: 100&ndash;350</span>
+          </div>
+          <div class="field-group">
+            <label data-i18n="soil.carbon">&#129807; ORGANIC CARBON (%)</label>
+            <input type="number" id="organicCarbon" placeholder="e.g. 0.8" min="0" max="10" step="0.1" inputmode="decimal" />
+            <span class="field-hint" data-i18n="soil.oc.hint">Typical: 0.5&ndash;2.0%</span>
+          </div>
+          <div class="field-group">
+            <label data-i18n="soil.moisture">&#128167; MOISTURE (%)</label>
+            <input type="number" id="moisture" placeholder="e.g. 35" min="0" max="100" inputmode="numeric" />
+            <span class="field-hint" data-i18n="soil.m.hint">Typical: 20&ndash;60%</span>
+          </div>
+          <div class="field-group">
+            <label>&#127777; <span data-i18n="soil.temp">TEMPERATURE (&deg;C)</span> <span class="auto-label" data-i18n="soil.temp.auto">auto-filled</span></label>
+            <input type="number" id="temperature" placeholder="Auto-detected or enter manually" min="0" max="60" inputmode="numeric" />
+            <span class="field-hint" data-i18n="soil.t.hint">Typical: 15&ndash;35&deg;C</span>
+          </div>
+          <div class="field-group">
+            <label>&#9879; <span data-i18n="soil.ph">SOIL pH</span> &mdash; <span id="phDisplay">6.5</span></label>
+            <input type="range" id="ph" min="3" max="10" step="0.1" value="6.5" />
+            <span class="field-hint" data-i18n="soil.ph.hint">Ideal: 5.5&ndash;7.0</span>
+          </div>
+          <div class="field-group">
+            <label data-i18n="soil.type">&#129704; SOIL TYPE</label>
+            <select id="soilType">
+              <option value="" data-i18n="soil.type.select">Select soil type...</option>
+              <option value="clay" data-i18n="soil.clay">Clay</option>
+              <option value="sandy" data-i18n="soil.sandy">Sandy</option>
+              <option value="loamy" data-i18n="soil.loamy">Loamy</option>
+              <option value="silty" data-i18n="soil.silty">Silty</option>
+              <option value="peaty" data-i18n="soil.peaty">Peaty</option>
+              <option value="chalky" data-i18n="soil.chalky">Chalky</option>
+              <option value="red laterite" data-i18n="soil.red">Red Laterite</option>
+              <option value="black cotton" data-i18n="soil.black">Black Cotton</option>
+              <option value="alluvial" data-i18n="soil.alluvial">Alluvial</option>
+            </select>
+          </div>
+        </div>
+        <div class="crop-selector">
+          <div class="crop-label" data-i18n="soil.crop.label">&#127806; WHAT DO YOU PLAN TO GROW? (optional)</div>
+          <div class="crop-grid" id="cropGrid">
+            <button class="crop-btn" data-crop="rice"><span>&#127806;</span><span data-i18n="crop.rice">Rice</span></button>
+            <button class="crop-btn" data-crop="wheat"><span>&#127807;</span><span data-i18n="crop.wheat">Wheat</span></button>
+            <button class="crop-btn" data-crop="maize"><span>&#127805;</span><span data-i18n="crop.maize">Maize</span></button>
+            <button class="crop-btn" data-crop="cotton"><span>&#127800;</span><span data-i18n="crop.cotton">Cotton</span></button>
+            <button class="crop-btn" data-crop="sugarcane"><span>&#127819;</span><span data-i18n="crop.sugarcane">Sugarcane</span></button>
+            <button class="crop-btn" data-crop="soybean"><span>&#129752;</span><span data-i18n="crop.soybean">Soybean</span></button>
+            <button class="crop-btn" data-crop="vegetables"><span>&#129388;</span><span data-i18n="crop.vegetables">Vegetables</span></button>
+            <button class="crop-btn" data-crop="fruits"><span>&#127822;</span><span data-i18n="crop.fruits">Fruits</span></button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="error-msg" id="errorMsg"></div>
+
+    <button class="btn-analyze" id="analyzeBtn">
+      <span>&#128302;</span><span data-i18n="soil.analyze">Analyze My Soil</span>
+    </button>
+
+    <!-- Loader -->
+    <div class="analyzing-card" id="analyzingCard">
+      <div class="analyzing-spinner"></div>
+      <div class="analyzing-title" data-i18n="loader.title">Analyzing your soil...</div>
+      <div class="analyzing-sub" data-i18n="loader.sub">Processing your values using smart AI</div>
+      <div class="anim-steps" id="animSteps">
+        <div class="anim-step" style="animation-delay:0.3s"><div class="step-dot"></div><span data-i18n="loader.s1">Reading soil values</span></div>
+        <div class="anim-step" style="animation-delay:0.9s"><div class="step-dot"></div><span data-i18n="loader.s2">Checking weather data</span></div>
+        <div class="anim-step" style="animation-delay:1.5s"><div class="step-dot"></div><span data-i18n="loader.s3">Calculating fertility score</span></div>
+        <div class="anim-step" style="animation-delay:2.1s"><div class="step-dot"></div><span data-i18n="loader.s4">Matching best crops</span></div>
+        <div class="anim-step" style="animation-delay:2.7s"><div class="step-dot"></div><span data-i18n="loader.s5">Fetching live mandi prices</span></div>
+      </div>
+    </div>
+
+    <!-- Results -->
+    <div id="result">
+      <div class="weather-result-banner" id="weatherResultBanner" style="display:none;"></div>
+      <div class="verdict-card" id="verdictCard">
+        <div class="verdict-top">
+          <div class="verdict-emoji" id="verdictEmoji"></div>
+          <div>
+            <div class="verdict-rating" id="verdictRating"></div>
+            <div class="verdict-score" id="verdictScore"></div>
+          </div>
+        </div>
+        <div class="verdict-desc" id="verdictDesc"></div>
+      </div>
+      <div class="result-card">
+        <div class="result-card-title" data-i18n="result.nutrients">&#128202; Nutrient Levels</div>
+        <div id="nutrientBars"></div>
+      </div>
+      <div class="result-card">
+        <div class="result-card-title" data-i18n="result.crops">&#127807; Best Crops for Your Soil</div>
+        <div class="crop-recs" id="cropRecs"></div>
+      </div>
+      <div class="result-card" id="mandiCard" style="display:none;">
+        <div class="result-card-title" data-i18n="result.mandi">&#128200; Live Mandi Prices</div>
+        <div class="mandi-sub" data-i18n="result.mandi.sub">Real-time prices from Agmarknet</div>
+        <div id="mandiList"></div>
+      </div>
+      <div class="result-card" id="fertilizerCard" style="display:none;">
+        <div class="result-card-title" data-i18n="result.fertilizer">&#129514; Fertilizer Suggestions</div>
+        <div id="fertilizerList"></div>
+      </div>
+      <div class="result-card" id="soilTipsCard" style="display:none;">
+        <div class="result-card-title" data-i18n="result.tips">&#128161; Soil Health Tips</div>
+        <div id="soilTipsList"></div>
+      </div>
+      <div class="ai-card">
+        <div class="result-card-title" style="margin-top:8px;" data-i18n="result.ai">Detailed Recommendation</div>
+        <div class="ai-text" id="aiText"></div>
+      </div>
+      <div class="result-actions">
+        <button class="btn-print" onclick="window.print()" data-i18n="result.print">&#128424; Print Results</button>
+        <button class="btn-reset" id="resetBtn" data-i18n="result.reset">&#8617; Analyze Another Sample</button>
+      </div>
+    </div>
+
+  </div>
+  <!-- END SOIL TAB -->
+
+  <!-- MARKETPLACE TAB -->
+  <div id="marketTab" style="display:none;">
+
+    <!-- Auth -->
+    <div id="authScreen">
+      <div class="auth-tabs">
+        <button class="auth-tab active" id="loginTabBtn" onclick="showAuthTab('login')" data-i18n="auth.login">Login</button>
+        <button class="auth-tab" id="registerTabBtn" onclick="showAuthTab('register')" data-i18n="auth.register">Register</button>
+      </div>
+      <div class="auth-card" id="loginForm">
+        <div class="auth-icon">&#128273;</div>
+        <h2 class="auth-title" data-i18n="auth.welcome">Welcome Back</h2>
+        <p class="auth-sub" data-i18n="auth.login.sub">Login to your AgriPrice account</p>
+        <div class="auth-fields">
+          <div class="field-group">
+            <label data-i18n="auth.phone">&#128222; Phone Number</label>
+            <input type="tel" id="loginPhone" data-i18n-placeholder="auth.phone.placeholder" placeholder="e.g. 9876543210" />
+          </div>
+          <div class="field-group">
+            <label data-i18n="auth.password">&#128274; Password</label>
+            <input type="password" id="loginPassword" data-i18n-placeholder="auth.password.placeholder" placeholder="Enter your password" />
+          </div>
+        </div>
+        <div class="auth-error" id="loginError"></div>
+        <button class="btn-analyze" style="width:100%;margin-top:8px;" onclick="login()" data-i18n="auth.login.btn">Login</button>
+        <p class="auth-switch"><span data-i18n="auth.no.account">Don't have an account?</span> <a href="#" onclick="showAuthTab('register')" data-i18n="auth.reg.here">Register here</a></p>
+      </div>
+      <div class="auth-card" id="registerForm" style="display:none;">
+        <div class="auth-icon">&#127807;</div>
+        <h2 class="auth-title" data-i18n="auth.create">Create Account</h2>
+        <p class="auth-sub" data-i18n="auth.reg.sub">Join AgriPrice Portal today</p>
+        <div class="auth-fields">
+          <div class="field-group">
+            <label data-i18n="auth.name">&#128100; Full Name</label>
+            <input type="text" id="regName" data-i18n-placeholder="auth.name.placeholder" placeholder="e.g. Ramesh Gowda" />
+          </div>
+          <div class="field-group">
+            <label data-i18n="auth.phone">&#128222; Phone Number</label>
+            <input type="tel" id="regPhone" data-i18n-placeholder="auth.phone.placeholder" placeholder="e.g. 9876543210" />
+          </div>
+          <div class="field-group">
+            <label data-i18n="auth.location">&#128205; Location</label>
+            <input type="text" id="regLocation" data-i18n-placeholder="auth.loc.placeholder" placeholder="e.g. Kolar, Karnataka" />
+          </div>
+          <div class="field-group">
+            <label data-i18n="auth.iam">&#128100; I am a</label>
+            <select id="regRole">
+              <option value="farmer" data-i18n="auth.farmer.opt">&#128107; Farmer — I want to sell crops</option>
+              <option value="buyer" data-i18n="auth.buyer.opt">&#128722; Buyer — I want to buy crops</option>
+            </select>
+          </div>
+          <div class="field-group">
+            <label data-i18n="auth.password">&#128274; Password</label>
+            <input type="password" id="regPassword" data-i18n-placeholder="auth.newpassword.placeholder" placeholder="Create a password" />
+          </div>
+        </div>
+        <div class="auth-error" id="registerError"></div>
+        <button class="btn-analyze" style="width:100%;margin-top:8px;" onclick="register()" data-i18n="auth.create.btn">Create Account</button>
+        <p class="auth-switch"><span data-i18n="auth.have.account">Already have an account?</span> <a href="#" onclick="showAuthTab('login')" data-i18n="auth.login.here">Login here</a></p>
+      </div>
+    </div>
+
+    <!-- Farmer Dashboard -->
+    <div id="farmerDashboard" style="display:none;">
+      <div class="dash-header">
+        <div>
+          <h2 class="panel-title" data-i18n="farmer.title">&#128107; Farmer Dashboard</h2>
+          <p class="dash-welcome" id="farmerWelcome"></p>
+        </div>
+        <div class="dash-actions">
+          <button class="btn-notif" id="notifBtn" onclick="toggleNotifications()">
+            &#128276; <span class="notif-count" id="notifCount" style="display:none;">0</span>
+          </button>
+          <button class="btn-switch-role" onclick="logout()" data-i18n="nav.logout">Logout</button>
+        </div>
+      </div>
+      <div class="notif-panel" id="notifPanel" style="display:none;">
+        <div class="notif-header">
+          <span data-i18n="notif.title">&#128276; Notifications</span>
+          <button class="notif-clear" onclick="clearNotifications()" data-i18n="notif.clear">Clear all</button>
+        </div>
+        <div id="notifList"></div>
+      </div>
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-num" id="statListings">0</div>
+          <div class="stat-label" data-i18n="farmer.listings">Active Listings</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num" id="statOrders">0</div>
+          <div class="stat-label" data-i18n="farmer.orders">Total Orders</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num" id="statPending">0</div>
+          <div class="stat-label" data-i18n="farmer.pending">Pending Orders</div>
+        </div>
+      </div>
+      <div class="market-card">
+        <div class="result-card-title" data-i18n="farmer.list.title">&#128203; List Your Produce</div>
+        <div class="listing-form">
+          <div class="listing-grid">
+            <div class="field-group">
+              <label data-i18n="farmer.crop">&#127806; Crop Name</label>
+              <input type="text" id="listCropName" data-i18n-placeholder="farmer.crop.ph" placeholder="e.g. Tomatoes" />
+            </div>
+            <div class="field-group">
+              <label data-i18n="farmer.qty">&#128230; Quantity (kg)</label>
+              <input type="number" id="listQty" placeholder="e.g. 500" min="1" />
+            </div>
+            <div class="field-group">
+              <label data-i18n="farmer.price">&#128176; Price per kg (&#8377;)</label>
+              <input type="number" id="listPrice" placeholder="e.g. 25" min="1" />
+            </div>
+            <div class="field-group">
+              <label data-i18n="farmer.loc">&#128205; Location</label>
+              <input type="text" id="listLocation" data-i18n-placeholder="farmer.loc.ph" placeholder="e.g. Mysuru, Karnataka" />
+            </div>
+            <div class="field-group">
+              <label data-i18n="farmer.until">&#128197; Available Until</label>
+              <input type="date" id="listDate" />
+            </div>
+          </div>
+          <div class="field-group" style="margin-top:12px;">
+            <label data-i18n="farmer.desc">&#128221; Description (optional)</label>
+            <textarea id="listDesc" data-i18n-placeholder="farmer.desc.ph" placeholder="e.g. Freshly harvested, organic..." rows="2"></textarea>
+          </div>
+          <button class="btn-analyze" style="margin-top:16px;width:100%;" onclick="addListing()" data-i18n="farmer.add">&#10133; Add Listing</button>
+        </div>
+      </div>
+      <div class="market-card">
+        <div class="result-card-title" data-i18n="farmer.my">&#128230; My Listings</div>
+        <div id="myListings"><p class="empty-msg" data-i18n="farmer.no.listings">No listings yet.</p></div>
+      </div>
+      <div class="market-card">
+        <div class="result-card-title" data-i18n="farmer.incoming">&#128203; Incoming Orders</div>
+        <div id="farmerOrders"><p class="empty-msg" data-i18n="farmer.no.orders">No orders yet.</p></div>
+      </div>
+    </div>
+
+    <!-- Buyer Dashboard -->
+    <div id="buyerDashboard" style="display:none;">
+      <div class="dash-header">
+        <div>
+          <h2 class="panel-title" data-i18n="buyer.title">&#128722; Browse Produce</h2>
+          <p class="dash-welcome" id="buyerWelcome"></p>
+        </div>
+        <div class="dash-actions">
+          <button class="btn-notif" id="buyerNotifBtn" onclick="toggleBuyerNotifications()">
+            &#128276; <span class="notif-count" id="buyerNotifCount" style="display:none;">0</span>
+          </button>
+          <button class="btn-switch-role" onclick="logout()" data-i18n="nav.logout">Logout</button>
+        </div>
+      </div>
+      <div class="notif-panel" id="buyerNotifPanel" style="display:none;">
+        <div class="notif-header">
+          <span data-i18n="notif.updates">&#128276; Order Updates</span>
+          <button class="notif-clear" onclick="clearBuyerNotifications()" data-i18n="notif.clear">Clear all</button>
+        </div>
+        <div id="buyerNotifList"></div>
+      </div>
+      <div class="market-card">
+        <div class="search-row">
+          <input type="text" id="searchInput" data-i18n-placeholder="buyer.search" placeholder="Search crop or location..." oninput="filterListings()" />
+          <select id="sortSelect" onchange="filterListings()">
+            <option value="newest" data-i18n="buyer.newest">Newest First</option>
+            <option value="price-asc" data-i18n="buyer.price.low">Price: Low to High</option>
+            <option value="price-desc" data-i18n="buyer.price.high">Price: High to Low</option>
+          </select>
+        </div>
+      </div>
+      <div class="map-container">
+        <div id="marketMap"></div>
+        <div class="map-placeholder" id="mapPlaceholder" data-i18n="buyer.map.placeholder">&#128205; Add listings with locations to see them on the map</div>
+      </div>
+      <div id="buyerListings" class="buyer-grid"></div>
+      <div class="market-card" style="margin-top:20px;">
+        <div class="result-card-title" data-i18n="buyer.myorders">&#128203; My Orders</div>
+        <div id="myOrders"><p class="empty-msg" data-i18n="buyer.no.orders">No orders placed yet.</p></div>
+      </div>
+    </div>
+
+    <!-- Order Modal -->
+    <div class="modal-overlay" id="orderModal" style="display:none;">
+      <div class="modal-box">
+        <div class="modal-title" data-i18n="order.title">&#128203; Place Order</div>
+        <div id="orderModalContent"></div>
+        <div class="field-group" style="margin-top:16px;">
+          <label data-i18n="order.qty">&#128230; Quantity you want (kg)</label>
+          <input type="number" id="orderQty" placeholder="e.g. 50" min="1" />
+        </div>
+        <div class="field-group" style="margin-top:12px;">
+          <label data-i18n="order.msg">&#128221; Message to farmer (optional)</label>
+          <textarea id="orderMsg" data-i18n-placeholder="order.msg.ph" placeholder="e.g. Need delivery by Friday..." rows="2"></textarea>
+        </div>
+        <div class="modal-actions">
+          <button class="btn-analyze" style="flex:1;" onclick="confirmOrder()" data-i18n="order.confirm">&#10003; Confirm Order</button>
+          <button class="btn-reset" style="flex:1;" onclick="closeOrderModal()" data-i18n="order.cancel">Cancel</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <!-- END MARKETPLACE TAB -->
+
+  </main>
+
+  <footer class="footer">
+    &#127807; AgriPrice Portal &mdash; <span data-i18n="footer.text">Smart Farming &amp; Crop Marketplace</span>
+  </footer>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="i18n.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
