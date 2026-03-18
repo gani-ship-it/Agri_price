@@ -25,6 +25,7 @@ try {
 
 const GEMINI_API_KEY  = process.env.GEMINI_API_KEY  || '';
 const WEATHER_API_KEY = process.env.WEATHER_API_KEY || '';
+const MANDI_API_KEY = process.env.MANDI_API_KEY || '';
 
 // ── DATABASE CONNECTION ───────────────────────────────────────
 // Railway provides MYSQL_URL automatically when you add MySQL plugin
@@ -419,8 +420,8 @@ app.get('/api/mandi', async (req, res) => {
   const crop  = req.query.crop  || 'Tomato';
   const state = req.query.state || 'Karnataka';
   const urls  = [
-    `https://api.data.gov.in/resource/9ef84268-d588-465a-a308-a864a43d0070?api-key=579b464db66ec23bdd000001cdd3946e44ce4aab825ef8fe01018ffd&format=json&filters[Commodity]=${encodeURIComponent(crop)}&filters[State]=${encodeURIComponent(state)}&limit=5`,
-    `https://api.data.gov.in/resource/9ef84268-d588-465a-a308-a864a43d0070?api-key=579b464db66ec23bdd000001cdd3946e44ce4aab825ef8fe01018ffd&format=json&filters[commodity]=${encodeURIComponent(crop)}&limit=10`,
+     `https://api.data.gov.in/resource/9ef84268-d588-465a-a308-a864a43d0070?api-key=${MANDI_API_KEY}&format=json&filters[Commodity]=${encodeURIComponent(crop)}&filters[State]=${encodeURIComponent(state)}&limit=5`,
+    `https://api.data.gov.in/resource/9ef84268-d588-465a-a308-a864a43d0070?api-key=${MANDI_API_KEY}&format=json&filters[commodity]=${encodeURIComponent(crop)}&limit=10`,
   ];
   for (const url of urls) {
     try {

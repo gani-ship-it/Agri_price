@@ -746,7 +746,7 @@ async function renderResults(data, location) {
       if (!el) return;
       if (d.success && d.records.length > 0) {
         const rec = d.records[0];
-        el.innerHTML = `<span class="price-tag">&#128200; &#8377;${rec.modal}/q &middot; Min &#8377;${rec.min} &middot; Max &#8377;${rec.max} &middot; ${rec.market}</span>`;
+        el.innerHTML = `<span class="price-tag">&#128200; &#8377;${rec.modal}/q &middot; Min &#8377;${rec.min} &middot; Max &#8377;${rec.max} &middot; ${rec.market} ${getPriceTrend(c.name, rec.modal)}</span>`;
       } else { el.innerHTML = ''; }
     } catch (e) { const el = document.getElementById(`price-${c.name.replace(/\s/g,'-')}`); if (el) el.innerHTML = ''; }
   });
@@ -777,6 +777,39 @@ async function renderResults(data, location) {
   setTimeout(() => document.getElementById('result').scrollIntoView({ behavior:'smooth', block:'start' }), 100);
 }
 
+// Typical modal price ranges per crop (Rs/quintal) for trend comparison
+const TYPICAL_PRICES = {
+  'rice':       { low: 1800, high: 2200 },
+  'wheat':      { low: 1900, high: 2400 },
+  'maize':      { low: 1300, high: 1800 },
+  'tomato':     { low: 600,  high: 2000 },
+  'cotton':     { low: 5000, high: 6500 },
+  'sugarcane':  { low: 250,  high: 320  },
+  'soybean':    { low: 3500, high: 4500 },
+  'groundnut':  { low: 4000, high: 5500 },
+  'onion':      { low: 500,  high: 1800 },
+  'potato':     { low: 600,  high: 1400 },
+  'vegetables': { low: 400,  high: 2000 },
+  'fruits':     { low: 1200, high: 4000 },
+};
+
+function getPriceTrend(cropName, modalPrice) {
+  const key    = cropName.toLowerCase();
+  const range  = TYPICAL_PRICES[key] || TYPICAL_PRICES['vegetables'];
+  const modal  = parseFloat(modalPrice);
+  if (isNaN(modal)) return '';
+  const mid    = (range.low + range.high) / 2;
+  const pct    = ((modal - mid) / mid) * 100;
+
+  if (pct > 10) {
+    return '<span class="trend-up" title="Above average price">&#8679; High</span>';
+  } else if (pct < -10) {
+    return '<span class="trend-down" title="Below average price">&#8681; Low</span>';
+  } else {
+    return '<span class="trend-normal" title="Average price">&#8680; Avg</span>';
+  }
+}
+
 async function fetchMandiSummary(crops, state) {
   const card = document.getElementById('mandiCard');
   const list = document.getElementById('mandiList');
@@ -801,9 +834,16 @@ async function fetchMandiSummary(crops, state) {
     : '<span class="price-ref-badge">&#128308; Reference prices</span>';
 
   list.innerHTML = `
-    <div style="margin-bottom:10px">${badge}</div>
+    <div style="margin-bottom:10px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+      ${badge}
+      <span class="trend-legend">
+        <span class="trend-up">&#8679; High</span> above avg &nbsp;
+        <span class="trend-normal">&#8680; Avg</span> normal &nbsp;
+        <span class="trend-down">&#8681; Low</span> below avg
+      </span>
+    </div>
     <table class="mandi-table">
-      <thead><tr><th>Crop</th><th>Market</th><th>Min (&#8377;/q)</th><th>Max (&#8377;/q)</th><th>Modal (&#8377;/q)</th><th>Date</th></tr></thead>
+      <thead><tr><th>Crop</th><th>Market</th><th>Min (&#8377;/q)</th><th>Max (&#8377;/q)</th><th>Modal (&#8377;/q)</th><th>Trend</th><th>Date</th></tr></thead>
       <tbody>${rows.map(row => `
         <tr>
           <td>${row.emoji} ${row.crop}</td>
@@ -811,6 +851,7 @@ async function fetchMandiSummary(crops, state) {
           <td>&#8377;${row.min||'-'}</td>
           <td>&#8377;${row.max||'-'}</td>
           <td><strong style="color:var(--green)">&#8377;${row.modal||'-'}</strong></td>
+          <td>${getPriceTrend(row.crop, row.modal)}</td>
           <td>${row.date||'-'}</td>
         </tr>`).join('')}
       </tbody>
