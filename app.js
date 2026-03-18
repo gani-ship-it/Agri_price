@@ -402,6 +402,17 @@ async function renderMyOrders() {
 // ══════════════════════════════════════════════════════════════
 //  BUYER LISTINGS
 // ══════════════════════════════════════════════════════════════
+let activeCropFilter = 'all';
+
+function setCropFilter(filter) {
+  activeCropFilter = filter;
+  // Update active button
+  document.querySelectorAll('.crop-filter-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.getAttribute('data-filter') === filter);
+  });
+  renderBuyerListings();
+}
+
 function filterListings() { renderBuyerListings(); }
 
 async function renderBuyerListings() {
@@ -411,15 +422,33 @@ async function renderBuyerListings() {
 
   try {
     let listings = await api('GET', '/api/listings');
+
     // Filter out own listings
-    listings = listings.filter(l =>
-      l.farmer_id !== currentUser?.id &&
-      (l.name.toLowerCase().includes(query) || (l.location || '').toLowerCase().includes(query))
-    );
+    listings = listings.filter(l => l.farmer_id !== currentUser?.id);
+
+    // Apply crop filter button
+    if (activeCropFilter && activeCropFilter !== 'all') {
+      listings = listings.filter(l =>
+        l.name.toLowerCase().includes(activeCropFilter.toLowerCase())
+      );
+    }
+
+    // Apply text search
+    if (query) {
+      listings = listings.filter(l =>
+        l.name.toLowerCase().includes(query) ||
+        (l.location || '').toLowerCase().includes(query)
+      );
+    }
+
+    // Apply sort
     if (sort === 'price-asc')  listings.sort((a,b) => a.price - b.price);
     if (sort === 'price-desc') listings.sort((a,b) => b.price - a.price);
 
-    if (!listings.length) { el.innerHTML = '<p class="empty-msg" style="padding:32px 0;">No produce listed yet. Check back soon!</p>'; return; }
+    if (!listings.length) {
+      el.innerHTML = `<p class="empty-msg" style="padding:32px 0;">${activeCropFilter !== 'all' ? 'No ' + activeCropFilter + ' listings found.' : 'No produce listed yet. Check back soon!'}</p>`;
+      return;
+    }
 
     el.innerHTML = listings.map(l => `
       <div class="buyer-card">
@@ -444,7 +473,6 @@ async function renderBuyerListings() {
         </div>
       </div>`).join('');
 
-    // Update map
     updateMapMarkersFromListings(listings);
   } catch (err) { el.innerHTML = '<p class="empty-msg">Error loading listings.</p>'; }
 }

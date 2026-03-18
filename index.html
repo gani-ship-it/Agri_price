@@ -381,6 +381,20 @@
             <option value="price-desc" data-i18n="buyer.price.high">Price: High to Low</option>
           </select>
         </div>
+        <!-- Crop Filter Buttons -->
+        <div class="crop-filter-row" id="cropFilterRow">
+          <button class="crop-filter-btn active" data-filter="all" onclick="setCropFilter('all')">&#127803; All</button>
+          <button class="crop-filter-btn" data-filter="rice" onclick="setCropFilter('rice')">&#127806; Rice</button>
+          <button class="crop-filter-btn" data-filter="wheat" onclick="setCropFilter('wheat')">&#127807; Wheat</button>
+          <button class="crop-filter-btn" data-filter="maize" onclick="setCropFilter('maize')">&#127805; Maize</button>
+          <button class="crop-filter-btn" data-filter="tomato" onclick="setCropFilter('tomato')">&#127813; Tomato</button>
+          <button class="crop-filter-btn" data-filter="onion" onclick="setCropFilter('onion')">&#129729; Onion</button>
+          <button class="crop-filter-btn" data-filter="potato" onclick="setCropFilter('potato')">&#129364; Potato</button>
+          <button class="crop-filter-btn" data-filter="cotton" onclick="setCropFilter('cotton')">&#127800; Cotton</button>
+          <button class="crop-filter-btn" data-filter="sugarcane" onclick="setCropFilter('sugarcane')">&#127819; Sugarcane</button>
+          <button class="crop-filter-btn" data-filter="vegetables" onclick="setCropFilter('vegetables')">&#129388; Vegetables</button>
+          <button class="crop-filter-btn" data-filter="fruits" onclick="setCropFilter('fruits')">&#127822; Fruits</button>
+        </div>
       </div>
       <div class="map-container">
         <div id="marketMap"></div>
