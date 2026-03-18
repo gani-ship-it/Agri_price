@@ -25,7 +25,6 @@ try {
 
 const GEMINI_API_KEY  = process.env.GEMINI_API_KEY  || '';
 const WEATHER_API_KEY = process.env.WEATHER_API_KEY || '';
-const MANDI_API_KEY = process.env.MANDI_API_KEY || '';
 
 // ── DATABASE CONNECTION ───────────────────────────────────────
 // Railway provides MYSQL_URL automatically when you add MySQL plugin
@@ -419,23 +418,26 @@ const FALLBACK_PRICES = {
 app.get('/api/mandi', async (req, res) => {
   const crop  = req.query.crop  || 'Tomato';
   const state = req.query.state || 'Karnataka';
+  const key   = process.env.MANDI_API_KEY || '579b464db66ec23bdd000001cdd3946e44ce4aab825ef8fe01018ffd';
   const urls  = [
-     `https://api.data.gov.in/resource/9ef84268-d588-465a-a308-a864a43d0070?api-key=${MANDI_API_KEY}&format=json&filters[Commodity]=${encodeURIComponent(crop)}&filters[State]=${encodeURIComponent(state)}&limit=5`,
-    `https://api.data.gov.in/resource/9ef84268-d588-465a-a308-a864a43d0070?api-key=${MANDI_API_KEY}&format=json&filters[commodity]=${encodeURIComponent(crop)}&limit=10`,
+    `https://api.data.gov.in/resource/9ef84268-d588-465a-a308-a864a43d0070?api-key=${key}&format=json&filters[Commodity]=${encodeURIComponent(crop)}&filters[State]=${encodeURIComponent(state)}&limit=5`,
+    `https://api.data.gov.in/resource/9ef84268-d588-465a-a308-a864a43d0070?api-key=${key}&format=json&filters[commodity]=${encodeURIComponent(crop)}&limit=10`,
   ];
   for (const url of urls) {
     try {
       const data = await httpGet(url);
       if (data.records && data.records.length > 0) {
+        // Log first record to see actual field names
+        console.log('Mandi API record sample:', JSON.stringify(data.records[0]));
         return res.json({ success: true, source: 'live', crop, state, records: data.records.map(r => ({
-          market: r.Market || r.District || 'N/A',
-          min:    r.Min_x0020_Price || r.Min_Price || '-',
-          max:    r.Max_x0020_Price || r.Max_Price || '-',
-          modal:  r.Modal_x0020_Price || r.Modal_Price || '-',
-          date:   r.Arrival_Date || 'Recent',
+          market: r.Market       || r.market       || r.District      || r.district      || r.APMCName    || r.APMC        || 'N/A',
+          min:    r.Min_x0020_Price || r.Min_Price  || r.min_price     || r.MinPrice      || r.min         || r.Minimum     || '-',
+          max:    r.Max_x0020_Price || r.Max_Price  || r.max_price     || r.MaxPrice      || r.max         || r.Maximum     || '-',
+          modal:  r.Modal_x0020_Price || r.Modal_Price || r.modal_price || r.ModalPrice   || r.modal       || r.Modal       || r.WholeSalePrice || '-',
+          date:   r.Arrival_Date || r.arrival_date  || r.Date         || r.date          || r.ReportedDate || 'Recent',
         }))});
       }
-    } catch (e) {}
+    } catch (e) { console.log('Mandi API error:', e.message); }
   }
   const fb = FALLBACK_PRICES[crop.toLowerCase()] || FALLBACK_PRICES['vegetables'];
   res.json({ success: true, source: 'fallback', crop, state, records: [{ ...fb, date: 'Reference price' }] });
