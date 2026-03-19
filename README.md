@@ -31,7 +31,13 @@ Open terminal in this folder and run:
 npm install
 ```
 
-### Step 3 — Start the server
+### Step 3 - Paste the code
+Copy the code from the github and paste it into vs code
+
+### Step 4 - Paste the API
+Get the api and paste the api in .env file(That is the reason why i public the .env file)
+
+### Step 5 — Start the server
 ```bash
 node server.js
 ```
@@ -54,12 +60,11 @@ Go to: **http://localhost:3000**
 
 ## 🌍 Features
 
-- 📷 Upload soil test report photo or PDF
 - 🧪 Manual input for NPK, pH, Moisture, Temperature
 - 🤖 AI reads and extracts values automatically
 - 🌾 Fertility rating: Poor / Moderate / Good / Excellent
 - 🌱 Crop recommendations with match scores
-- 🌍 5 languages: English, Hindi, Swahili, French, Spanish
+- 🌍 5 languages: English, Hindi, Kannada
 - 🖨️ Print-friendly results
 
 ---
@@ -82,4 +87,4 @@ Go to: **http://localhost:3000**
 - Share the URL with farmers via WhatsApp
 - They open it on any phone browser (no app needed)
 - Works offline-ready for manual input
--
+

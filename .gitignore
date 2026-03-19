@@ -1,7 +1,6 @@
 # Never upload these to GitHub!
 
 # API keys and secrets — MOST IMPORTANT
-.env
 
 # Node.js dependencies (too large, auto-installed)
 node_modules/
