@@ -52,6 +52,11 @@ async function connectDB() {
           .replace(/INTEGER PRIMARY KEY AUTOINCREMENT/g, 'SERIAL PRIMARY KEY');
       };
 
+      // Test the connection first so we fail fast instead of hanging
+      const client = await pool.connect();
+      client.release();
+      console.log('PostgreSQL connection test passed!');
+
       db = {
         run: async (sql, params = []) => {
           let q = convertSql(sql);
@@ -77,11 +82,11 @@ async function connectDB() {
     // Create tables if they don't exist
     await db.run(`
       CREATE TABLE IF NOT EXISTS users (
-        id              INTEGER PRIMARY KEY AUTOINCREMENT,
+        id              SERIAL PRIMARY KEY,
         name       VARCHAR(100) NOT NULL,
         phone      VARCHAR(15)  NOT NULL UNIQUE,
         password   VARCHAR(255) NOT NULL,
-        role       TEXT CHECK( role IN ('farmer','buyer') ) NOT NULL,
+        role       VARCHAR(10)  NOT NULL CHECK( role IN ('farmer','buyer') ),
         location   VARCHAR(200),
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
@@ -89,7 +94,7 @@ async function connectDB() {
 
     await db.run(`
       CREATE TABLE IF NOT EXISTS listings (
-        id              INTEGER PRIMARY KEY AUTOINCREMENT,
+        id              SERIAL PRIMARY KEY,
         farmer_id       INT NOT NULL,
         farmer_name     VARCHAR(100),
         farmer_contact  VARCHAR(15),
@@ -103,16 +108,15 @@ async function connectDB() {
         image_url       TEXT,
         lat             DECIMAL(10,7),
         lng             DECIMAL(10,7),
-        posted_at       TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY (farmer_id) REFERENCES users(id) ON DELETE CASCADE
+        posted_at       TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
     `);
 
-    try { await db.run("ALTER TABLE listings ADD COLUMN image_url TEXT"); } catch (e) {}
+    // NOTE: image_url is already in the schema above, no ALTER TABLE needed
 
     await db.run(`
       CREATE TABLE IF NOT EXISTS orders (
-        id              INTEGER PRIMARY KEY AUTOINCREMENT,
+        id              SERIAL PRIMARY KEY,
         buyer_id        INT NOT NULL,
         buyer_name      VARCHAR(100),
         buyer_phone     VARCHAR(15),
@@ -127,22 +131,19 @@ async function connectDB() {
         total_price     DECIMAL(12,2),
         location        VARCHAR(200),
         message         TEXT,
-        status          TEXT CHECK( status IN ('Pending','Confirmed','Delivered','Cancelled') ) DEFAULT 'Pending',
-        placed_at       TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY (buyer_id)  REFERENCES users(id) ON DELETE CASCADE,
-        FOREIGN KEY (farmer_id) REFERENCES users(id) ON DELETE CASCADE
+        status          VARCHAR(20) NOT NULL DEFAULT 'Pending' CHECK( status IN ('Pending','Confirmed','Delivered','Cancelled') ),
+        placed_at       TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
     `);
 
     await db.run(`
       CREATE TABLE IF NOT EXISTS notifications (
-        id              INTEGER PRIMARY KEY AUTOINCREMENT,
+        id              SERIAL PRIMARY KEY,
         user_id    INT NOT NULL,
         message    TEXT NOT NULL,
         type       VARCHAR(20),
         is_read    BOOLEAN DEFAULT FALSE,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
     `);
 
