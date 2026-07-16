@@ -161,6 +161,11 @@
               <option value="alluvial" data-i18n="soil.alluvial">Alluvial</option>
             </select>
           </div>
+          <div class="field-group">
+            <label data-i18n="soil.land">&#128207; LAND SIZE (Acres)</label>
+            <input type="number" id="landSize" data-i18n-placeholder="soil.land.ph" placeholder="e.g. 2" min="0" step="0.1" inputmode="decimal" />
+            <span class="field-hint" data-i18n="soil.land.hint">For yield & profit estimate</span>
+          </div>
         </div>
         <div class="crop-selector">
           <div class="crop-label" data-i18n="soil.crop.label">&#127806; WHAT DO YOU PLAN TO GROW? (optional)</div>
@@ -366,6 +371,10 @@
               <label data-i18n="farmer.until">&#128197; Available Until</label>
               <input type="date" id="listDate" />
             </div>
+            <div class="field-group">
+              <label data-i18n="farmer.image">&#128247; Product Image (optional)</label>
+              <input type="file" id="listImage" accept="image/*" style="padding: 9px; background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--radius-md); color: var(--text);" />
+            </div>
           </div>
           <div class="field-group" style="margin-top:12px;">
             <label data-i18n="farmer.desc">&#128221; Description (optional)</label>
@@ -392,6 +401,7 @@
           <p class="dash-welcome" id="buyerWelcome"></p>
         </div>
         <div class="dash-actions">
+          <button class="btn-gps" id="buyerGpsBtn" onclick="useBuyerGPS()" title="Use my GPS for accurate distance">&#128205; Use GPS</button>
           <button class="btn-notif" id="buyerNotifBtn" onclick="toggleBuyerNotifications()">
             &#128276; <span class="notif-count" id="buyerNotifCount" style="display:none;">0</span>
           </button>
@@ -513,6 +523,7 @@
       'soil.n.hint':'Typical: 80–200','soil.p.hint':'Typical: 20–80','soil.k.hint':'Typical: 100–350',
       'soil.oc.hint':'Typical: 0.5–2.0%','soil.m.hint':'Typical: 20–60%',
       'soil.t.hint':'Typical: 15–35°C','soil.ph.hint':'Ideal: 5.5–7.0',
+      'soil.land':'LAND SIZE (Acres)','soil.land.ph':'e.g. 2','soil.land.hint':'For yield & profit estimate',
       'soil.crop.label':'WHAT DO YOU PLAN TO GROW? (optional)','soil.analyze':'Analyze My Soil',
       'crop.rice':'Rice','crop.wheat':'Wheat','crop.maize':'Maize','crop.cotton':'Cotton',
       'crop.sugarcane':'Sugarcane','crop.soybean':'Soybean','crop.vegetables':'Vegetables','crop.fruits':'Fruits',
@@ -580,6 +591,7 @@
       'soil.n.hint':'ಸಾಮಾನ್ಯ: 80–200','soil.p.hint':'ಸಾಮಾನ್ಯ: 20–80','soil.k.hint':'ಸಾಮಾನ್ಯ: 100–350',
       'soil.oc.hint':'ಸಾಮಾನ್ಯ: 0.5–2.0%','soil.m.hint':'ಸಾಮಾನ್ಯ: 20–60%',
       'soil.t.hint':'ಸಾಮಾನ್ಯ: 15–35°C','soil.ph.hint':'ಉತ್ತಮ: 5.5–7.0',
+      'soil.land':'ಭೂಮಿ ವಿಸ್ತೀರ್ಣ (ಎಕರೆ)','soil.land.ph':'ಉದಾ: 2','soil.land.hint':'ಇಳುವರಿ ಮತ್ತು ಲಾಭದ ಅಂದಾಜಿಗೆ',
       'soil.crop.label':'ನೀವು ಏನು ಬೆಳೆಯಲು ಬಯಸುತ್ತೀರಿ? (ಐಚ್ಛಿಕ)','soil.analyze':'ನನ್ನ ಮಣ್ಣು ವಿಶ್ಲೇಷಿಸಿ',
       'crop.rice':'ಭತ್ತ','crop.wheat':'ಗೋಧಿ','crop.maize':'ಮೆಕ್ಕೆ ಜೋಳ','crop.cotton':'ಹತ್ತಿ',
       'crop.sugarcane':'ಕಬ್ಬು','crop.soybean':'ಸೋಯಾಬೀನ್','crop.vegetables':'ತರಕಾರಿ','crop.fruits':'ಹಣ್ಣುಗಳು',
@@ -647,6 +659,7 @@
       'soil.n.hint':'सामान्य: 80–200','soil.p.hint':'सामान्य: 20–80','soil.k.hint':'सामान्य: 100–350',
       'soil.oc.hint':'सामान्य: 0.5–2.0%','soil.m.hint':'सामान्य: 20–60%',
       'soil.t.hint':'सामान्य: 15–35°C','soil.ph.hint':'आदर्श: 5.5–7.0',
+      'soil.land':'भूमि का आकार (एकड़)','soil.land.ph':'जैसे: 2','soil.land.hint':'उपज और लाभ अनुमान के लिए',
       'soil.crop.label':'आप क्या उगाना चाहते हैं? (वैकल्पिक)','soil.analyze':'मेरी मिट्टी का विश्लेषण करें',
       'crop.rice':'चावल','crop.wheat':'गेहूं','crop.maize':'मक्का','crop.cotton':'कपास',
       'crop.sugarcane':'गन्ना','crop.soybean':'सोयाबीन','crop.vegetables':'सब्जियां','crop.fruits':'फल',

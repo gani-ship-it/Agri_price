@@ -8,7 +8,8 @@ const express = require('express');
 const path    = require('path');
 const https   = require('https');
 const http    = require('http');
-const mysql   = require('mysql2/promise');
+const sqlite3 = require('sqlite3');
+const { open } = require('sqlite');
 
 const app  = express();
 const PORT = process.env.PORT || 3000;
@@ -26,44 +27,40 @@ try {
 const GEMINI_API_KEY  = process.env.GEMINI_API_KEY  || '';
 const WEATHER_API_KEY = process.env.WEATHER_API_KEY || '';
 
+let twilioClient = null;
+if (process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN && process.env.TWILIO_ACCOUNT_SID !== 'your_account_sid') {
+  const twilio = require('twilio');
+  twilioClient = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
+}
+
 // ── DATABASE CONNECTION ───────────────────────────────────────
-// Railway provides MYSQL_URL automatically when you add MySQL plugin
-// For local: set DB_HOST, DB_USER, DB_PASSWORD, DB_NAME in .env
+// SQLite Database Configuration
 let db;
 
 async function connectDB() {
   try {
-    // Railway MySQL URL format: mysql://user:password@host:port/database
-    if (process.env.MYSQL_URL || process.env.DATABASE_URL) {
-      db = await mysql.createPool(process.env.MYSQL_URL || process.env.DATABASE_URL);
-    } else {
-      db = await mysql.createPool({
-        host:     process.env.DB_HOST     || 'localhost',
-        user:     process.env.DB_USER     || 'root',
-        password: process.env.DB_PASSWORD || '',
-        database: process.env.DB_NAME     || 'agriprice',
-        port:     process.env.DB_PORT     || 3306,
-        waitForConnections: true,
-        connectionLimit: 10,
-      });
-    }
+    db = await open({
+      filename: './agriprice.db',
+      driver: sqlite3.Database
+    });
+
 
     // Create tables if they don't exist
-    await db.execute(`
+    await db.run(`
       CREATE TABLE IF NOT EXISTS users (
-        id         INT AUTO_INCREMENT PRIMARY KEY,
+        id              INTEGER PRIMARY KEY AUTOINCREMENT,
         name       VARCHAR(100) NOT NULL,
         phone      VARCHAR(15)  NOT NULL UNIQUE,
         password   VARCHAR(255) NOT NULL,
-        role       ENUM('farmer','buyer') NOT NULL,
+        role       TEXT CHECK( role IN ('farmer','buyer') ) NOT NULL,
         location   VARCHAR(200),
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
     `);
 
-    await db.execute(`
+    await db.run(`
       CREATE TABLE IF NOT EXISTS listings (
-        id              INT AUTO_INCREMENT PRIMARY KEY,
+        id              INTEGER PRIMARY KEY AUTOINCREMENT,
         farmer_id       INT NOT NULL,
         farmer_name     VARCHAR(100),
         farmer_contact  VARCHAR(15),
@@ -74,6 +71,7 @@ async function connectDB() {
         location        VARCHAR(200),
         description     TEXT,
         available_until DATE,
+        image_url       TEXT,
         lat             DECIMAL(10,7),
         lng             DECIMAL(10,7),
         posted_at       TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -81,9 +79,11 @@ async function connectDB() {
       )
     `);
 
-    await db.execute(`
+    try { await db.run("ALTER TABLE listings ADD COLUMN image_url TEXT"); } catch (e) {}
+
+    await db.run(`
       CREATE TABLE IF NOT EXISTS orders (
-        id              INT AUTO_INCREMENT PRIMARY KEY,
+        id              INTEGER PRIMARY KEY AUTOINCREMENT,
         buyer_id        INT NOT NULL,
         buyer_name      VARCHAR(100),
         buyer_phone     VARCHAR(15),
@@ -98,16 +98,16 @@ async function connectDB() {
         total_price     DECIMAL(12,2),
         location        VARCHAR(200),
         message         TEXT,
-        status          ENUM('Pending','Confirmed','Delivered','Cancelled') DEFAULT 'Pending',
+        status          TEXT CHECK( status IN ('Pending','Confirmed','Delivered','Cancelled') ) DEFAULT 'Pending',
         placed_at       TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (buyer_id)  REFERENCES users(id) ON DELETE CASCADE,
         FOREIGN KEY (farmer_id) REFERENCES users(id) ON DELETE CASCADE
       )
     `);
 
-    await db.execute(`
+    await db.run(`
       CREATE TABLE IF NOT EXISTS notifications (
-        id         INT AUTO_INCREMENT PRIMARY KEY,
+        id              INTEGER PRIMARY KEY AUTOINCREMENT,
         user_id    INT NOT NULL,
         message    TEXT NOT NULL,
         type       VARCHAR(20),
@@ -120,7 +120,7 @@ async function connectDB() {
     console.log('  Database    : Connected & tables ready');
   } catch (err) {
     console.error('  Database    : FAILED -', err.message);
-    console.error('  Make sure MySQL is running and .env has correct DB credentials');
+    console.error('  Make sure you have write permissions for the SQLite database');
     db = null;
   }
 }
@@ -164,14 +164,14 @@ app.post('/api/auth/register', requireDB, async (req, res) => {
   if (password.length < 4) return res.status(400).json({ error: 'Password must be at least 4 characters.' });
 
   try {
-    const [existing] = await db.execute('SELECT id FROM users WHERE phone = ?', [phone]);
+    const existing = await db.all('SELECT id FROM users WHERE phone = ?', [phone]);
     if (existing.length > 0) return res.status(400).json({ error: 'This phone number is already registered.' });
 
-    const [result] = await db.execute(
+    const result = await db.run(
       'INSERT INTO users (name, phone, password, role, location) VALUES (?, ?, ?, ?, ?)',
       [name, phone, password, role, location || '']
     );
-    const user = { id: result.insertId, name, phone, role, location: location || '' };
+    const user = { id: result.lastID, name, phone, role, location: location || '' };
     res.json({ success: true, user });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -184,7 +184,7 @@ app.post('/api/auth/login', requireDB, async (req, res) => {
   if (!phone || !password) return res.status(400).json({ error: 'Phone and password required.' });
 
   try {
-    const [rows] = await db.execute(
+    const rows = await db.all(
       'SELECT id, name, phone, role, location FROM users WHERE phone = ? AND password = ?',
       [phone, password]
     );
@@ -202,7 +202,7 @@ app.post('/api/auth/login', requireDB, async (req, res) => {
 // GET /api/listings — all listings (for buyers)
 app.get('/api/listings', requireDB, async (req, res) => {
   try {
-    const [rows] = await db.execute(
+    const rows = await db.all(
       'SELECT * FROM listings ORDER BY posted_at DESC'
     );
     res.json(rows);
@@ -215,7 +215,7 @@ app.get('/api/listings', requireDB, async (req, res) => {
 app.get('/api/listings/my', requireDB, async (req, res) => {
   const { farmerId } = req.query;
   try {
-    const [rows] = await db.execute(
+    const rows = await db.all(
       'SELECT * FROM listings WHERE farmer_id = ? ORDER BY posted_at DESC',
       [farmerId]
     );
@@ -227,16 +227,16 @@ app.get('/api/listings/my', requireDB, async (req, res) => {
 
 // POST /api/listings — add new listing
 app.post('/api/listings', requireDB, async (req, res) => {
-  const { farmerId, farmerName, farmerContact, name, emoji, qty, price, location, description, availableUntil, lat, lng } = req.body;
+  const { farmerId, farmerName, farmerContact, name, emoji, qty, price, location, description, availableUntil, imageUrl, lat, lng } = req.body;
   if (!farmerId || !name || !qty || !price) return res.status(400).json({ error: 'Missing required fields.' });
 
   try {
-    const [result] = await db.execute(
-      `INSERT INTO listings (farmer_id, farmer_name, farmer_contact, name, emoji, qty, price, location, description, available_until, lat, lng)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [farmerId, farmerName, farmerContact, name, emoji, qty, price, location || '', description || '', availableUntil || null, lat || null, lng || null]
+    const result = await db.run(
+      `INSERT INTO listings (farmer_id, farmer_name, farmer_contact, name, emoji, qty, price, location, description, available_until, image_url, lat, lng)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [farmerId, farmerName, farmerContact, name, emoji, qty, price, location || '', description || '', availableUntil || null, imageUrl || null, lat || null, lng || null]
     );
-    const [rows] = await db.execute('SELECT * FROM listings WHERE id = ?', [result.insertId]);
+    const rows = await db.all('SELECT * FROM listings WHERE id = ?', [result.lastID]);
     res.json({ success: true, listing: rows[0] });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -246,7 +246,7 @@ app.post('/api/listings', requireDB, async (req, res) => {
 // DELETE /api/listings/:id
 app.delete('/api/listings/:id', requireDB, async (req, res) => {
   try {
-    await db.execute('DELETE FROM listings WHERE id = ? AND farmer_id = ?', [req.params.id, req.body.farmerId]);
+    await db.run('DELETE FROM listings WHERE id = ? AND farmer_id = ?', [req.params.id, req.body.farmerId]);
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -263,7 +263,7 @@ app.post('/api/orders', requireDB, async (req, res) => {
           listingId, cropName, cropEmoji, qty, pricePerKg, totalPrice, location, message } = req.body;
 
   try {
-    const [result] = await db.execute(
+    const result = await db.run(
       `INSERT INTO orders (buyer_id, buyer_name, buyer_phone, farmer_id, farmer_name, farmer_contact,
         listing_id, crop_name, crop_emoji, qty, price_per_kg, total_price, location, message)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
@@ -272,12 +272,28 @@ app.post('/api/orders', requireDB, async (req, res) => {
     );
 
     // Notify farmer
-    await db.execute(
+    await db.run(
       'INSERT INTO notifications (user_id, message, type) VALUES (?, ?, ?)',
       [farmerId, `New order from ${buyerName} for ${qty} kg of ${cropName} (Rs.${totalPrice})`, 'order']
     );
 
-    res.json({ success: true, orderId: result.insertId });
+    // Twilio SMS Integration
+    if (twilioClient && farmerContact) {
+      try {
+        // Only send if it's a valid phone number (starting with +)
+        const formattedContact = farmerContact.startsWith('+') ? farmerContact : '+91' + farmerContact;
+        await twilioClient.messages.create({
+          body: `🌾 AgriPrice Alert: You have a new order from ${buyerName} for ${qty}kg of ${cropName}! Call them at ${buyerPhone} to confirm.`,
+          from: process.env.TWILIO_PHONE_NUMBER,
+          to: formattedContact
+        });
+        console.log(`[Twilio] SMS sent to ${formattedContact}`);
+      } catch (smsErr) {
+        console.error("[Twilio] Failed to send SMS:", smsErr.message);
+      }
+    }
+
+    res.json({ success: true, orderId: result.lastID });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -286,7 +302,7 @@ app.post('/api/orders', requireDB, async (req, res) => {
 // GET /api/orders/farmer?farmerId=X
 app.get('/api/orders/farmer', requireDB, async (req, res) => {
   try {
-    const [rows] = await db.execute(
+    const rows = await db.all(
       'SELECT * FROM orders WHERE farmer_id = ? ORDER BY placed_at DESC',
       [req.query.farmerId]
     );
@@ -299,7 +315,7 @@ app.get('/api/orders/farmer', requireDB, async (req, res) => {
 // GET /api/orders/buyer?buyerId=X
 app.get('/api/orders/buyer', requireDB, async (req, res) => {
   try {
-    const [rows] = await db.execute(
+    const rows = await db.all(
       'SELECT * FROM orders WHERE buyer_id = ? ORDER BY placed_at DESC',
       [req.query.buyerId]
     );
@@ -313,10 +329,10 @@ app.get('/api/orders/buyer', requireDB, async (req, res) => {
 app.patch('/api/orders/:id/status', requireDB, async (req, res) => {
   const { status, buyerId } = req.body;
   try {
-    await db.execute('UPDATE orders SET status = ? WHERE id = ?', [status, req.params.id]);
+    await db.run('UPDATE orders SET status = ? WHERE id = ?', [status, req.params.id]);
 
     // Notify buyer
-    const [orders] = await db.execute('SELECT * FROM orders WHERE id = ?', [req.params.id]);
+    const orders = await db.all('SELECT * FROM orders WHERE id = ?', [req.params.id]);
     if (orders.length > 0) {
       const o = orders[0];
       const msgs = {
@@ -325,7 +341,7 @@ app.patch('/api/orders/:id/status', requireDB, async (req, res) => {
         'Cancelled': `Your order for ${o.crop_name} was Cancelled by the farmer.`,
       };
       if (msgs[status]) {
-        await db.execute(
+        await db.run(
           'INSERT INTO notifications (user_id, message, type) VALUES (?, ?, ?)',
           [o.buyer_id, msgs[status], status === 'Cancelled' ? 'cancel' : 'update']
         );
@@ -345,7 +361,7 @@ app.patch('/api/orders/:id/status', requireDB, async (req, res) => {
 // GET /api/notifications?userId=X
 app.get('/api/notifications', requireDB, async (req, res) => {
   try {
-    const [rows] = await db.execute(
+    const rows = await db.all(
       'SELECT * FROM notifications WHERE user_id = ? ORDER BY created_at DESC LIMIT 20',
       [req.query.userId]
     );
@@ -358,7 +374,7 @@ app.get('/api/notifications', requireDB, async (req, res) => {
 // PATCH /api/notifications/read?userId=X — mark all as read
 app.patch('/api/notifications/read', requireDB, async (req, res) => {
   try {
-    await db.execute('UPDATE notifications SET is_read = TRUE WHERE user_id = ?', [req.query.userId]);
+    await db.run('UPDATE notifications SET is_read = TRUE WHERE user_id = ?', [req.query.userId]);
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -368,7 +384,7 @@ app.patch('/api/notifications/read', requireDB, async (req, res) => {
 // DELETE /api/notifications?userId=X — clear all
 app.delete('/api/notifications', requireDB, async (req, res) => {
   try {
-    await db.execute('DELETE FROM notifications WHERE user_id = ?', [req.query.userId]);
+    await db.run('DELETE FROM notifications WHERE user_id = ?', [req.query.userId]);
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: err.message });

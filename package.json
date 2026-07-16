@@ -8,13 +8,22 @@
     "dev": "nodemon server.js"
   },
   "dependencies": {
+    "dotenv": "^17.4.2",
     "express": "^4.18.2",
-    "mysql2": "^3.6.0"
+    "sqlite": "^5.1.1",
+    "sqlite3": "^6.0.1",
+    "twilio": "^6.0.2"
   },
   "devDependencies": {
     "nodemon": "^3.0.1"
   },
-  "keywords": ["soil", "agriculture", "AI", "gemini", "farmers"],
+  "keywords": [
+    "soil",
+    "agriculture",
+    "AI",
+    "gemini",
+    "farmers"
+  ],
   "author": "AgriPrice Portal",
   "license": "MIT"
 }

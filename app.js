@@ -9,6 +9,7 @@ let mapInstance  = null;
 let mapMarkers   = [];
 let currentUser  = null;
 let currentOrderListing = null;
+let buyerLocation = null; // { lat, lng } of the logged-in buyer
 
 // ── INIT ──────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
@@ -116,7 +117,7 @@ function afterLogin(user) {
     document.getElementById('buyerDashboard').style.display  = 'block';
     document.getElementById('farmerDashboard').style.display = 'none';
     document.getElementById('buyerWelcome').textContent      = 'Welcome, ' + user.name + '! Find fresh produce near you.';
-    renderBuyerListings();
+    getBuyerLocation().then(() => renderBuyerListings());
     renderMyOrders();
     loadBuyerNotifications();
     setTimeout(initMarketMap, 400);
@@ -218,8 +219,19 @@ async function addListing() {
   const loc   = document.getElementById('listLocation').value.trim() || currentUser.location || '';
   const date  = document.getElementById('listDate').value;
   const desc  = document.getElementById('listDesc').value.trim();
+  const imgInput = document.getElementById('listImage');
 
   if (!name || !qty || !price) { alert('Please fill in Crop Name, Quantity and Price.'); return; }
+
+  let imageUrl = null;
+  if (imgInput && imgInput.files && imgInput.files[0]) {
+    const file = imgInput.files[0];
+    imageUrl = await new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = (e) => resolve(e.target.result);
+      reader.readAsDataURL(file);
+    });
+  }
 
   const cropEmojis = {
     rice:'🌾',wheat:'🌿',maize:'🌽',cotton:'🌸',sugarcane:'🎋',
@@ -239,11 +251,12 @@ async function addListing() {
       farmerId: currentUser.id, farmerName: currentUser.name,
       farmerContact: currentUser.phone, name, emoji,
       qty: parseFloat(qty), price: parseFloat(price),
-      location: loc, description: desc, availableUntil: date || null, lat, lng,
+      location: loc, description: desc, availableUntil: date || null, imageUrl, lat, lng,
     });
     ['listCropName','listQty','listPrice','listDate','listDesc'].forEach(id => {
       document.getElementById(id).value = '';
     });
+    if (imgInput) imgInput.value = '';
     renderMyListings();
     updateMapMarkers();
     alert('Listing added successfully!');
@@ -278,6 +291,7 @@ async function renderMyListings() {
         <div class="listing-emoji">${l.emoji}</div>
         <div class="listing-info">
           <div class="listing-name">${l.name}</div>
+          ${l.image_url ? `<img src="${l.image_url}" style="width:100%; max-height: 120px; object-fit: cover; border-radius: 8px; margin: 8px 0;" alt="Product">` : ''}
           <div class="listing-meta">&#128230; ${l.qty} kg &nbsp;&middot;&nbsp; &#8377;${l.price}/kg &nbsp;&middot;&nbsp; &#128205; ${l.location}</div>
           ${l.available_until ? '<div class="listing-meta">Until: ' + l.available_until.split('T')[0] + '</div>' : ''}
           ${l.description ? '<div class="listing-desc">' + l.description + '</div>' : ''}
@@ -400,6 +414,90 @@ async function renderMyOrders() {
 }
 
 // ══════════════════════════════════════════════════════════════
+//  BUYER LOCATION & DISTANCE ESTIMATE
+// ══════════════════════════════════════════════════════════════
+
+// DEFAULT: use buyer's registered city location (reliable city-level geocode)
+// GPS on desktop uses IP geolocation which can be 100s of km off
+async function getBuyerLocation() {
+  const loc = currentUser?.location;
+  if (loc) {
+    const coords = await geocodeLocation(loc);
+    if (coords) {
+      buyerLocation = coords;
+      updateGpsBtn('📍 ' + loc.split(',')[0].trim(), false);
+    }
+  }
+}
+
+// Optional: buyer explicitly clicks "Use GPS" for exact location
+async function useBuyerGPS() {
+  const btn = document.getElementById('buyerGpsBtn');
+  if (!navigator.geolocation) { btn.textContent = '❌ GPS N/A'; return; }
+  btn.textContent = '⏳ Locating...';
+  btn.disabled = true;
+  navigator.geolocation.getCurrentPosition(
+    async (pos) => {
+      buyerLocation = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+      // Reverse geocode to get city name for display
+      try {
+        const res  = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${pos.coords.latitude}&lon=${pos.coords.longitude}&format=json`);
+        const data = await res.json();
+        const city = data.address?.city || data.address?.town || data.address?.village || 'Your Location';
+        updateGpsBtn('✅ ' + city, true);
+      } catch { updateGpsBtn('✅ GPS Active', true); }
+      renderBuyerListings();
+    },
+    () => { updateGpsBtn('❌ GPS denied', false); btn.disabled = false; },
+    { timeout: 8000, enableHighAccuracy: true }
+  );
+}
+
+function updateGpsBtn(label, active) {
+  const btn = document.getElementById('buyerGpsBtn');
+  if (!btn) return;
+  btn.textContent = label;
+  btn.disabled    = false;
+  btn.classList.toggle('btn-gps-active', active);
+}
+
+// Haversine — used only as a quick pre-check (skip OSRM if > 2000 km off)
+function haversineDistance(lat1, lon1, lat2, lon2) {
+  const R    = 6371;
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a = Math.sin(dLat / 2) ** 2 +
+            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+            Math.sin(dLon / 2) ** 2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
+// Format seconds into human-readable delivery time
+function formatDuration(seconds) {
+  const hrs = seconds / 3600;
+  if (hrs < 1)       return Math.round(seconds / 60) + ' min';
+  if (hrs < 24)      return hrs.toFixed(1) + ' hrs';
+  return (hrs / 24).toFixed(1) + ' days';
+}
+
+// Fetch REAL road distance from OSRM (free, no API key)
+async function getRoadDistance(farmerLat, farmerLng) {
+  if (!buyerLocation || !farmerLat || !farmerLng) return null;
+  try {
+    const { lat: bLat, lng: bLng } = buyerLocation;
+    const url = `https://router.project-osrm.org/route/v1/driving/${bLng},${bLat};${farmerLng},${farmerLat}?overview=false`;
+    const res  = await fetch(url);
+    const data = await res.json();
+    if (data.code !== 'Ok' || !data.routes?.length) return null;
+    const route = data.routes[0];
+    return {
+      km:   (route.distance / 1000).toFixed(1),   // metres → km
+      time: formatDuration(route.duration)          // seconds → readable
+    };
+  } catch (e) { return null; }
+}
+
+// ══════════════════════════════════════════════════════════════
 //  BUYER LISTINGS
 // ══════════════════════════════════════════════════════════════
 let activeCropFilter = 'all';
@@ -450,7 +548,9 @@ async function renderBuyerListings() {
       return;
     }
 
-    el.innerHTML = listings.map(l => `
+    el.innerHTML = listings.map(l => {
+      const hasBadge = buyerLocation && l.lat && l.lng;
+      return `
       <div class="buyer-card">
         <div class="buyer-card-top">
           <span class="buyer-emoji">${l.emoji}</span>
@@ -461,6 +561,8 @@ async function renderBuyerListings() {
           </div>
           <div class="buyer-price">&#8377;${l.price}<span>/kg</span></div>
         </div>
+        ${hasBadge ? `<div class="distance-badge" id="dist-badge-${l.id}"><span class="dist-loading">&#128344; Calculating road distance...</span></div>` : ''}
+        ${l.image_url ? `<div style="margin-top: 12px; margin-bottom: 12px;"><img src="${l.image_url}" style="width: 100%; max-height: 200px; object-fit: cover; border-radius: var(--radius-sm);" alt="${l.name}"></div>` : ''}
         <div class="buyer-details">
           <span>&#128230; ${l.qty} kg available</span>
           ${l.available_until ? '<span>Until ' + l.available_until.split('T')[0] + '</span>' : ''}
@@ -469,9 +571,24 @@ async function renderBuyerListings() {
         ${l.description ? '<div class="buyer-desc">' + l.description + '</div>' : ''}
         <div class="buyer-card-actions">
           <a href="tel:${l.farmer_contact}" class="btn-contact">&#128222; Call Farmer</a>
+          <a href="https://wa.me/${l.farmer_contact.replace(/[^0-9]/g, '') && (l.farmer_contact.startsWith('+') ? l.farmer_contact.replace(/[^0-9]/g,'') : '91' + l.farmer_contact.replace(/[^0-9]/g,''))}?text=${encodeURIComponent('Hello ' + l.farmer_name + '! I saw your listing on AgriPrice Portal. I am interested in buying your ' + l.name + ' (₹' + l.price + '/kg). Is it still available?')}" target="_blank" class="btn-whatsapp">&#128172; WhatsApp</a>
           <button class="btn-order" onclick="openOrderModal(${l.id},'${l.name}','${l.emoji}',${l.price},'${l.location}','${l.farmer_name}',${l.farmer_id},'${l.farmer_contact}',${l.qty})">&#128203; Place Order</button>
         </div>
-      </div>`).join('');
+      </div>`;
+    }).join('');
+
+    // Async: update each badge with real OSRM road distance
+    listings.forEach(async (l) => {
+      if (!buyerLocation || !l.lat || !l.lng) return;
+      const badge = document.getElementById(`dist-badge-${l.id}`);
+      if (!badge) return;
+      const info = await getRoadDistance(l.lat, l.lng);
+      if (info) {
+        badge.innerHTML = `<span class="dist-km">&#128344; ${info.km} km away</span><span class="dist-sep">&middot;</span><span class="dist-time">&#128664; ~${info.time} delivery</span>`;
+      } else {
+        badge.style.display = 'none';
+      }
+    });
 
     updateMapMarkersFromListings(listings);
   } catch (err) { el.innerHTML = '<p class="empty-msg">Error loading listings.</p>'; }
@@ -648,6 +765,7 @@ function collectFormData() {
   const temp = parseFloat(document.getElementById('temperature').value);
   const oc   = parseFloat(document.getElementById('organicCarbon').value);
   const ph   = parseFloat(document.getElementById('ph').value);
+  const land = parseFloat(document.getElementById('landSize').value);
   return {
     N: isNaN(N)?null:N, P: isNaN(P)?null:P, K: isNaN(K)?null:K,
     moisture: isNaN(mois)?null:mois, temperature: isNaN(temp)?null:temp,
@@ -658,6 +776,7 @@ function collectFormData() {
     location: document.getElementById('locationInput').value.trim() || null,
     crop: selectedCrop,
     hasManualData: !isNaN(N) || !isNaN(P) || !isNaN(K),
+    landSize: isNaN(land)?null:land,
   };
 }
 
@@ -669,7 +788,7 @@ function setupAnalyzeButton() {
     startAnalyzing();
     try {
       const result = await api('POST', '/api/analyze', formData);
-      setTimeout(() => { stopAnalyzing(); renderResults(result, formData.location); }, 3000);
+      setTimeout(() => { stopAnalyzing(); renderResults(result, formData.location, formData.landSize); }, 3000);
     } catch (err) {
       stopAnalyzing();
       showError(err.message || 'Analysis failed.');
@@ -680,7 +799,7 @@ function setupAnalyzeButton() {
 
 function setupResetButton() {
   document.getElementById('resetBtn').addEventListener('click', () => {
-    ['nitrogen','phosphorus','potassium','moisture','temperature','organicCarbon'].forEach(id => {
+    ['nitrogen','phosphorus','potassium','moisture','temperature','organicCarbon','landSize'].forEach(id => {
       document.getElementById(id).value = '';
     });
     document.getElementById('ph').value = 6.5;
@@ -714,7 +833,22 @@ function stopAnalyzing() {
   document.querySelectorAll('.anim-step').forEach(s => s.classList.remove('done'));
 }
 
-async function renderResults(data, location) {
+const AVERAGE_YIELD_PER_ACRE = {
+  'Rice': 2000,
+  'Wheat': 1200,
+  'Maize': 1500,
+  'Cotton': 800,
+  'Sugarcane': 30000,
+  'Soybean': 1000,
+  'Tomato': 10000,
+  'Potato': 10000,
+  'Onion': 8000,
+  'Vegetables': 8000,
+  'Fruits': 6000,
+  'Groundnut': 800
+};
+
+async function renderResults(data, location, landSize) {
   const map = { Poor:{cls:'poor',emoji:'🔴'}, Moderate:{cls:'moderate',emoji:'⚠️'}, Good:{cls:'good',emoji:'✅'}, Excellent:{cls:'excellent',emoji:'🌟'} };
   const r   = map[data.fertility_rating] || map['Moderate'];
   document.getElementById('verdictCard').className     = 'verdict-card ' + r.cls;
@@ -774,7 +908,20 @@ async function renderResults(data, location) {
       if (!el) return;
       if (d.success && d.records.length > 0) {
         const rec = d.records[0];
-        el.innerHTML = `<span class="price-tag">&#128200; &#8377;${rec.modal}/q &middot; Min &#8377;${rec.min} &middot; Max &#8377;${rec.max} &middot; ${rec.market} ${getPriceTrend(c.name, rec.modal)}</span>`;
+        let priceHtml = `<span class="price-tag">&#128200; &#8377;${rec.modal}/q &middot; Min &#8377;${rec.min} &middot; Max &#8377;${rec.max} &middot; ${rec.market} ${getPriceTrend(c.name, rec.modal)}</span>`;
+        if (landSize && landSize > 0) {
+          const yieldPerAcre = AVERAGE_YIELD_PER_ACRE[c.name] || 5000;
+          const totalYield = landSize * yieldPerAcre;
+          const revenue = totalYield * (rec.modal / 100);
+          priceHtml += `<div class="profit-badge">
+            <div class="profit-title">&#128176; Profit & Yield Estimate (${landSize} Acres)</div>
+            <div class="profit-stats">
+              <span>&#128230; Est. Yield: <strong>${totalYield.toLocaleString('en-IN')} kg</strong></span>
+              <span>&#8377; Est. Revenue: <strong>&#8377;${Math.round(revenue).toLocaleString('en-IN')}</strong></span>
+            </div>
+          </div>`;
+        }
+        el.innerHTML = priceHtml;
       } else { el.innerHTML = ''; }
     } catch (e) { const el = document.getElementById(`price-${c.name.replace(/\s/g,'-')}`); if (el) el.innerHTML = ''; }
   });
