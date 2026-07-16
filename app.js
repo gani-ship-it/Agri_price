@@ -1017,20 +1017,51 @@ async function fetchMandiSummary(crops, state) {
         <span class="trend-down">&#8681; Low</span> below avg
       </span>
     </div>
-    <table class="mandi-table">
-      <thead><tr><th>Crop</th><th>Market</th><th>Min (&#8377;/q)</th><th>Max (&#8377;/q)</th><th>Modal (&#8377;/q)</th><th>Trend</th><th>Date</th></tr></thead>
-      <tbody>${rows.map(row => `
-        <tr>
-          <td>${row.emoji} ${row.crop}</td>
-          <td>${row.market||'-'}</td>
-          <td>&#8377;${row.min||'-'}</td>
-          <td>&#8377;${row.max||'-'}</td>
-          <td><strong style="color:var(--green)">&#8377;${row.modal||'-'}</strong></td>
-          <td>${getPriceTrend(row.crop, row.modal)}</td>
-          <td>${row.date||'-'}</td>
-        </tr>`).join('')}
-      </tbody>
-    </table>`;
+
+    <!-- Desktop: table -->
+    <div class="mandi-table-wrap">
+      <table class="mandi-table">
+        <thead><tr><th>Crop</th><th>Market</th><th>Min (&#8377;/q)</th><th>Max (&#8377;/q)</th><th>Modal (&#8377;/q)</th><th>Trend</th><th>Date</th></tr></thead>
+        <tbody>${rows.map(row => `
+          <tr>
+            <td>${row.emoji} ${row.crop}</td>
+            <td>${row.market||'-'}</td>
+            <td>&#8377;${row.min||'-'}</td>
+            <td>&#8377;${row.max||'-'}</td>
+            <td><strong style="color:var(--green)">&#8377;${row.modal||'-'}</strong></td>
+            <td>${getPriceTrend(row.crop, row.modal)}</td>
+            <td>${row.date||'-'}</td>
+          </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Mobile: cards -->
+    <div class="mandi-cards">
+      ${rows.map(row => `
+        <div class="mandi-card">
+          <div class="mandi-card-top">
+            <span class="mandi-card-crop">${row.emoji} ${row.crop}</span>
+            ${getPriceTrend(row.crop, row.modal)}
+          </div>
+          <div class="mandi-card-market">📍 ${row.market||'-'}</div>
+          <div class="mandi-card-prices">
+            <div class="mandi-price-cell">
+              <span class="mandi-price-label">Min</span>
+              <span class="mandi-price-val">&#8377;${row.min||'-'}</span>
+            </div>
+            <div class="mandi-price-cell">
+              <span class="mandi-price-label">Max</span>
+              <span class="mandi-price-val">&#8377;${row.max||'-'}</span>
+            </div>
+            <div class="mandi-price-cell mandi-price-modal">
+              <span class="mandi-price-label">Modal</span>
+              <span class="mandi-price-val modal-val">&#8377;${row.modal||'-'}</span>
+            </div>
+          </div>
+          <div class="mandi-card-date">📅 ${row.date||'-'}</div>
+        </div>`).join('')}
+    </div>`;
 }
 
 function showError(msg) {
