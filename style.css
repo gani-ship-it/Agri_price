@@ -2372,3 +2372,137 @@ input[type="range"]::-webkit-slider-thumb {
   color: var(--amber);
   font-size: 15px;
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   COMPREHENSIVE MOBILE RESPONSIVE OVERRIDES
+   Covers all screens ≤ 640px
+═══════════════════════════════════════════════════════════════ */
+@media (max-width: 640px) {
+
+  /* ── NAVBAR ── */
+  .navbar { padding: 12px 16px; }
+  .nav-logo { font-size: 18px; }
+  .nav-logo .nav-dot { display: none; }
+
+  /* ── HERO ── */
+  .hero { padding: 32px 16px 24px; }
+  .hero-title { font-size: clamp(28px, 9vw, 48px); }
+  .hero-sub { font-size: 15px; }
+  .hero-tag { font-size: 12px; padding: 5px 14px; }
+
+  /* ── MAIN CONTAINER ── */
+  .container { padding: 0 12px 100px; }
+
+  /* ── AUTH / ROLE SELECTION ── */
+  .market-role-card { padding: 28px 16px; }
+  .role-btns { flex-direction: column; align-items: stretch; gap: 12px; }
+  .role-btn { min-width: unset; padding: 20px 16px; flex-direction: row; gap: 12px; font-size: 18px; }
+  .role-btn span { font-size: 12px; }
+
+  /* ── DASHBOARD HEADERS ── */
+  .dash-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  .dash-actions {
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+  }
+  .dash-actions > * { flex-shrink: 0; }
+  .panel-title { font-size: 20px; }
+  .dash-welcome { font-size: 13px; }
+
+  /* ── GPS BUTTON ── */
+  .btn-gps { font-size: 11px; padding: 5px 10px; }
+
+  /* ── MARKET CARDS ── */
+  .market-card { padding: 16px; }
+
+  /* ── LISTING FORM ── */
+  .listing-form .fields-grid { grid-template-columns: 1fr; gap: 12px; }
+  .fields-grid { grid-template-columns: 1fr; gap: 12px; }
+
+  /* ── SEARCH ROW ── */
+  .search-row { flex-direction: column; gap: 8px; }
+  .search-row input, .search-row select { width: 100%; }
+
+  /* ── BUYER GRID → single column ── */
+  .buyer-grid { grid-template-columns: 1fr; }
+  .listing-grid { grid-template-columns: 1fr; }
+
+  /* ── BUYER CARD ── */
+  .buyer-card { padding: 16px; }
+  .buyer-card-top { gap: 10px; }
+  .buyer-name { font-size: 15px; }
+  .buyer-price { font-size: 20px; }
+
+  /* ── LISTING ITEM ── */
+  .listing-item { flex-wrap: wrap; gap: 10px; }
+  .listing-actions { flex-direction: row; align-items: center; gap: 8px; }
+  .listing-value { font-size: 14px; }
+
+  /* ── MANUAL HEADER ── */
+  .manual-header, .manual-header-static { padding: 14px 16px; }
+  .manual-body { padding: 0 16px 16px; }
+
+  /* ── BUTTON ROWS ── */
+  .result-actions { flex-direction: column; }
+  .btn-print { width: 100%; }
+
+  /* ── ORDER FORM BUTTONS ── */
+  .order-actions { flex-direction: column; }
+
+  /* ── NOTIF PANEL ── */
+  .notif-panel { margin-bottom: 12px; }
+
+  /* ── VERDICT BLOCK ── */
+  .verdict { flex-direction: column; gap: 12px; }
+  .verdict-emoji { font-size: 44px; }
+  .verdict-rating { font-size: 28px; }
+
+  /* ── RESULT CARDS ── */
+  .result-card { padding: 16px; }
+  .result-card-title { font-size: 17px; }
+
+  /* ── CROP RECS ── */
+  .crop-recs { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+
+  /* ── WEATHER BANNER ── */
+  .weather-result-banner { flex-direction: column; align-items: flex-start; gap: 6px; font-size: 13px; }
+
+  /* ── MANDI TABLE ── */
+  .mandi-table { font-size: 11px; }
+  .mandi-table th, .mandi-table td { padding: 7px 5px; }
+
+  /* ── MAP ── */
+  .map-container { height: 230px; }
+
+  /* ── HOW IT WORKS ── */
+  .how-it-works { padding: 20px 14px; }
+  .hiw-steps { gap: 10px; }
+  .hiw-step { min-width: 130px; padding: 16px 12px; }
+  .hiw-arrow { display: none; }
+
+  /* ── NOTIF HEADER ── */
+  .notif-header { flex-wrap: wrap; gap: 8px; font-size: 13px; }
+
+  /* ── ORDERS (farmer) ── */
+  .order-card { padding: 14px; }
+  .order-header { flex-direction: column; align-items: flex-start; gap: 6px; }
+
+  /* ── CONTACT / WHATSAPP BUTTONS ── */
+  .btn-contact { font-size: 13px; padding: 11px; }
+  .btn-whatsapp { font-size: 12px; padding: 9px; }
+  .buyer-card-actions { flex-direction: column; gap: 8px; }
+
+  /* ── API INPUT ROW ── */
+  .api-input-row { flex-direction: column; }
+  .api-input-row input { width: 100%; }
+
+  /* ── EXTRA BOTTOM PADDING for fixed bottom nav ── */
+  body { padding-bottom: 90px; }
+}
