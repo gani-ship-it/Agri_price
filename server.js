@@ -34,16 +34,45 @@ if (process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN && process.e
 }
 
 // ── DATABASE CONNECTION ───────────────────────────────────────
-// SQLite Database Configuration
 let db;
+const isPostgres = !!process.env.DATABASE_URL;
 
 async function connectDB() {
   try {
-    db = await open({
-      filename: './agriprice.db',
-      driver: sqlite3.Database
-    });
+    if (isPostgres) {
+      console.log('Connecting to PostgreSQL (Production)...');
+      const { Pool } = require('pg');
+      const pool = new Pool({
+        connectionString: process.env.DATABASE_URL,
+        ssl: { rejectUnauthorized: false }
+      });
 
+      const convertSql = (sql) => {
+        let i = 1;
+        return sql
+          .replace(/\?/g, () => `$${i++}`)
+          .replace(/INTEGER PRIMARY KEY AUTOINCREMENT/g, 'SERIAL PRIMARY KEY');
+      };
+
+      db = {
+        run: async (sql, params = []) => {
+          let q = convertSql(sql);
+          if (q.trim().toUpperCase().startsWith('INSERT') && !q.includes('RETURNING')) {
+            q += ' RETURNING id';
+          }
+          const res = await pool.query(q, params);
+          return { lastID: res.rows[0]?.id };
+        },
+        all: async (sql, params = []) => (await pool.query(convertSql(sql), params)).rows,
+        get: async (sql, params = []) => (await pool.query(convertSql(sql), params)).rows[0]
+      };
+    } else {
+      console.log('Connecting to SQLite (Local)...');
+      db = await open({
+        filename: './agriprice.db',
+        driver: sqlite3.Database
+      });
+    }
 
     // Create tables if they don't exist
     await db.run(`
