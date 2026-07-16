@@ -8,8 +8,6 @@ const express = require('express');
 const path    = require('path');
 const https   = require('https');
 const http    = require('http');
-const sqlite3 = require('sqlite3');
-const { open } = require('sqlite');
 
 const app  = express();
 const PORT = process.env.PORT || 3000;
@@ -68,6 +66,8 @@ async function connectDB() {
       };
     } else {
       console.log('Connecting to SQLite (Local)...');
+      const sqlite3 = require('sqlite3');
+      const { open }  = require('sqlite');
       db = await open({
         filename: './agriprice.db',
         driver: sqlite3.Database
