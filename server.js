@@ -259,11 +259,27 @@ app.post('/api/listings', requireDB, async (req, res) => {
   const { farmerId, farmerName, farmerContact, name, emoji, qty, price, location, description, availableUntil, imageUrl, lat, lng } = req.body;
   if (!farmerId || !name || !qty || !price) return res.status(400).json({ error: 'Missing required fields.' });
 
+  let finalImageUrl = imageUrl || null;
+
   try {
+    // If it's a base64 image and Cloudinary is configured, upload it!
+    if (finalImageUrl && finalImageUrl.startsWith('data:image') && process.env.CLOUDINARY_URL && process.env.CLOUDINARY_URL !== 'your_cloudinary_url_here') {
+      try {
+        const cloudinary = require('cloudinary').v2;
+        const uploadRes = await cloudinary.uploader.upload(finalImageUrl, {
+          folder: 'agriprice_listings'
+        });
+        finalImageUrl = uploadRes.secure_url;
+      } catch (uploadErr) {
+        console.error('Cloudinary upload failed:', uploadErr);
+        // If upload fails, keep the base64 string as fallback
+      }
+    }
+
     const result = await db.run(
       `INSERT INTO listings (farmer_id, farmer_name, farmer_contact, name, emoji, qty, price, location, description, available_until, image_url, lat, lng)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [farmerId, farmerName, farmerContact, name, emoji, qty, price, location || '', description || '', availableUntil || null, imageUrl || null, lat || null, lng || null]
+      [farmerId, farmerName, farmerContact, name, emoji, qty, price, location || '', description || '', availableUntil || null, finalImageUrl, lat || null, lng || null]
     );
     const rows = await db.all('SELECT * FROM listings WHERE id = ?', [result.lastID]);
     res.json({ success: true, listing: rows[0] });
